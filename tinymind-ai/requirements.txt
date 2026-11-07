@@ -1,0 +1,15 @@
+# amu core (Version 1: from-scratch character-level GPT)
+torch
+numpy
+
+# Vision: reading images. Free and open source, no pretrained model.
+pillow
+
+# The cadagent package needs nothing else: it is standard-library only.
+# Optional, only if you want the agent to *execute* GIS steps instead of
+# only generating scripts for you:
+#   - GDAL/OGR command line tools (ogr2ogr)  -> https://gdal.org/download.html
+#   - QGIS (qgis_process + PyQGIS)          -> https://qgis.org/download/
+# On Windows, for live AutoCAD/Revit control:
+#   pyautocad  (AutoCAD COM automation, AutoCAD only)
+#   pyrevit    (Revit CLI runner, see https://pyrevit.readthedocs.io)

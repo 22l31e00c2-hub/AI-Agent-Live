@@ -1,0 +1,52 @@
+Hello, my name is amu.
+I am an artificial intelligence model.
+I learn patterns from text.
+I use neural networks to predict the next character.
+Machine learning helps computers learn from data.
+Python is a programming language.
+A neural network contains layers of mathematical operations.
+Artificial intelligence can learn patterns from examples.
+
+A drawing is the main container in AutoCAD, and it is saved as a DWG file.
+A layer groups objects that share a colour, a linetype and a lineweight.
+Before you draw, you create layers so that roads, parcels and contours stay separate.
+The command LAYER opens the layer manager, and the command -LAYER works on the command line.
+A polyline is a single object made of many segments, and PLINE draws one.
+A block is a reusable group of objects that you insert many times.
+An xref links another drawing into the current drawing instead of copying it.
+PURGE removes unused blocks, layers and linetypes, and AUDIT checks a drawing for errors.
+A script file with the extension SCR replays command line input inside AutoCAD.
+AutoLISP is the scripting language built into AutoCAD, and a LISP file ends with LSP.
+Coordinates in a drawing are expressed in drawing units, and units can be metres or millimetres.
+
+AutoCAD Map 3D adds geographic data to AutoCAD.
+Map 3D can import an ESRI shapefile and can export drawing objects back to a shapefile.
+A coordinate system describes how drawing coordinates map to positions on the earth.
+The EPSG code identifies a coordinate system, for example EPSG 25832 is ETRS89 UTM zone 32 North.
+A topology describes how lines connect to each other and where polygons share a boundary.
+Map Cleanup fixes small gaps, overshoots and duplicate geometry before analysis.
+Feature Data Objects connect a drawing to a spatial database such as PostGIS or Oracle.
+
+Revit is a building information modelling application.
+A Revit model is stored in an RVT file and is organised by categories such as walls and doors.
+A level is a horizontal reference plane, and every wall is hosted by a level.
+A family is a parametric component, and a family instance is one placement of that component.
+A schedule reads parameters from elements and lists them in a table.
+A sheet is a printable page that holds views, and sheets can be exported to PDF in one batch.
+A transaction groups changes to a model so that they are saved or undone together.
+The Revit API is accessed with Python through pyRevit or Dynamo.
+pyRevit runs a Python script inside a running model and can open many models in a row.
+
+QGIS is a free geographic information system.
+A QGIS project is saved as a QGZ file, and a geopackage stores layers in one SQLite file.
+QGIS reads a shapefile with the OGR provider and writes a geopackage layer.
+The processing toolbox runs algorithms such as buffer, clip, dissolve and spatial join.
+The command qgis process runs the same algorithms without a graphical interface.
+PyQGIS is the Python interface of QGIS, and it exposes layers, features and geometry.
+To reproject a layer you change its coordinate reference system to another EPSG code.
+A spatial join transfers attributes from one layer to another based on location.
+A buffer creates a polygon at a fixed distance around each feature.
+
+Good practice is to keep one layer per theme and one unit system per drawing.
+Good practice is to audit and purge a drawing before you deliver it.
+Good practice is to project every layer to the same coordinate system before analysis.

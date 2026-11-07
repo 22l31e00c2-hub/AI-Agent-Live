@@ -1,0 +1,11 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# amu outputs
+checkpoints/
+ws/
+
+# OS noise
+.DS_Store
