@@ -27,21 +27,83 @@ tinymind-ai/
 │   └── knowledge/      # revit.py, autocad.py, map3d.py, qgis.py
 │
 ├── tests/test_agent.py # unit tests, standard library only
+├── tests/test_model.py # network tests (skip without torch)
 └── requirements.txt
 ```
 
-## 1. The model (Version 1)
+## 1. The model
 
 ```bash
 pip install -r requirements.txt
-python train.py                 # 5000 steps, CPU is fine
+python train.py                 # warmup + cosine, stops when validation stalls
 python generate.py "LAYER " 200
+python generate.py --bench      # parameters and characters per second
 ```
 
 `AMU_STEPS=50 python train.py` trains for a few seconds, for a smoke test.
+`train.py` also reads `AMU_LR`, `AMU_WARMUP`, `AMU_EVAL_EVERY` and `AMU_SEED`
+from the environment, so a run is reproducible.
 
 This is a character-level GPT prototype: it learns which character tends to
 follow which, nothing more. It is the foundation, not a chatbot.
+
+### The architecture, and what came from Ling-3.1-flash
+
+| Piece | Here | Why |
+| --- | --- | --- |
+| Normalisation | pre-norm **RMSNorm** | one scale vector per norm, no mean subtraction, stable at any depth |
+| Positions | **RoPE** | rotary position applied to queries and keys; no position parameters at all |
+| Attention | **grouped-query** (4 query heads, 2 key/value heads) | smaller key/value projections and cache, query capacity unchanged |
+| Feed-forward | **SwiGLU** at ~8/3 width | gated activation inside the old 4x parameter budget |
+| Embeddings | **tied** input and output matrix | fewer parameters, one shared meaning per token |
+| Decoding | **KV cache** | each new character attends to cached keys instead of re-running the window |
+| Training | warmup, cosine decay to 10%, AdamW beta2 0.95, weight decay 0.1 on matrices, grad clip 1.0 | the recipe current LLMs use at every scale |
+
+The reference point is
+[Ling-3.1-flash](https://huggingface.co/inclusionAI/Ling-3.1-flash): 560B
+parameters with 25B active, 63 KDA (gated linear attention) layers and 9
+gated-MLA layers in a 7:1 ratio, 512 routed experts plus one shared expert
+(8 active), 64 heads, hidden size 4096, a 1M-token context, and a native
+thinking mode with tool calling.
+
+Six ideas transfer down to 800K parameters and are used above: an RMSNorm-only
+pre-norm block, RoPE, grouped key/value heads, SwiGLU, tied embeddings, and the
+warmup + cosine schedule with beta2 0.95 and decoupled weight decay.
+
+Three do not, and pretending otherwise would be dishonest:
+
+* **Mixture of experts.** Routing 512 experts needs far more tokens than the
+  3.5 KB corpus here. Every expert would see the same handful of characters
+  and the router would learn noise.
+* **KDA / linear attention.** Its win is context length: a constant-size state
+  instead of a growing cache. At `block_size = 128` there is nothing to save,
+  and it gives up exact recall - the one thing a character model needs.
+* **MLA and a 1M context.** Compressed latent attention is engineering for
+  serving, not for learning `-LAYER` commands from 3 KB of text.
+
+Measured on this machine (2 CPU threads, `data/input.txt`, 59-character
+vocabulary): **733,696 parameters**, 3.8 training steps/s, about 600 generated
+characters/s. Validation loss fell from 4.156 (uniform guessing) to **2.439
+(3.52 bits/char) at step 100**, then rose steadily while training loss fell to
+0.08 - with 3.1 KB of training text the network memorises instead of
+generalising.
+
+So `train.py` keeps the best-validation weights in `checkpoints/amu.pt`, stops
+after `AMU_PATIENCE` steps without improvement (step 400 in the run above), and
+saves the last state to `checkpoints/amu-final.pt` so the overfitting is
+visible instead of hidden:
+
+```bash
+python generate.py "LAYER " 160          # best validation: 3.52 bits/char
+python generate.py --final "LAYER " 160  # last step: recites the corpus
+```
+
+The best-validation model produces character soup; the last-step model produces
+fluent CAD sentences it has memorised. Both are honest results at this corpus
+size, and the ceiling is the data, not the network. Add text to
+`data/input.txt` before adding parameters: with 3 KB of text a 700K-parameter
+model is an expensive lookup table, and fluent output means memory, not
+understanding.
 
 ## 2. The agent
 
@@ -111,8 +173,11 @@ not produce mojibake: the decoding with the fewest replacement characters wins. 
 refuses `file://`, private ranges, `localhost` and link-local addresses, so a
 crafted request cannot make it read your own network. `search the web for ...`
 tries DuckDuckGo (two no-JavaScript endpoints) and then the Wikipedia API -
-best effort, since none of them needs a key; `look up <url>` is the reliable
-path.
+best effort, since none of them needs a key - and then **opens the top result
+itself**, so you get a summary and `page.txt` / `summary.md` instead of a list
+of links. If the first page will not load it tries the next one and says which
+were skipped; the link list always stays in the answer. `look up <url>` is
+still the reliable path when you already know the page.
 
 **Vision** (`cadagent/vision.py`) measures an image with Pillow: format, size,
 mode, dominant colours, ink coverage, edge density, EXIF (including a GPS note
@@ -216,4 +281,11 @@ paths, layer names, elevations), missing-parameter handling, the guarantee that
 every recipe builds a non-empty artifact, the execution allowlist, the
 "mutating work needs `--yes`" rule, and the session log. It also runs the
 AutoLISP builders (escaping, naming, parenthesis checking) and asserts that
-every generated `.lsp` file is structurally well formed.
+every generated `.lsp` file is structurally well formed. Web tests run against
+injected transports, so the suite never touches the network.
+
+`tests/test_model.py` checks the network itself: the causal mask (a later
+character cannot change an earlier prediction), cached decoding matching a full
+forward pass, grouped-query shapes, and generation running past `block_size`.
+Those tests need torch, so they skip under an interpreter without it and pass
+under `.venv/bin/python`.

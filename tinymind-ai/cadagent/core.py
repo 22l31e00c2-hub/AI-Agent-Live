@@ -241,6 +241,7 @@ class Agent:
         request: str,
         transport=None,
         query: Optional[str] = None,
+        read_top: bool = True,
     ) -> Report:
         plan = Plan(request=request, domain=None, recipe=None)
         report = Report(plan=plan, capability="web")
@@ -269,11 +270,82 @@ class Agent:
             self._record(report)
             return report
 
+        # A list of links is not an answer, so read the best result too. The
+        # first one that loads wins; the rest stay as links either way.
+        read_block: List[str] = []
+        read_notes: List[str] = []
+        read_url: Optional[str] = None
+        artifacts: List[Artifact] = []
+
+        if read_top:
+            for title, url in results[:2]:
+                try:
+                    data = web.lookup(
+                        url,
+                        question=term,
+                        transport=transport,
+                        cache_dir=self.cache_dir,
+                        max_age=self.cache_ttl,
+                    )
+                except web.WebError as exc:
+                    read_notes.append(
+                        "skipped : %s (%s)" % (url, exc)
+                    )
+                    continue
+
+                page = data.page
+                read_url = url
+                read_block = [
+                    "read    : %s" % (page.title or title),
+                    "url     : %s" % url,
+                    "cache   : %s" % (web.cache_note(page) or "live fetch"),
+                ]
+                for sentence in data.sentences[:4]:
+                    read_block.append("    - %s" % sentence)
+                if not data.sentences:
+                    read_block.append("    (the page had no readable sentences)")
+
+                artifacts = [
+                    Artifact("page.txt", "text", page.text[:200_000]),
+                    Artifact(
+                        "summary.md",
+                        "markdown",
+                        "# %s\n\n%s\n\nSource: %s\n" % (
+                            page.title or url,
+                            "\n".join(
+                                "- " + sentence for sentence in data.sentences
+                            )
+                            or "(no readable sentences)",
+                            url,
+                        ),
+                    ),
+                ]
+                break
+
         lines = ["amu web search | %s (%s)" % (term, outcome.provider), ""]
+        lines += read_block
+        lines += read_notes
+        if read_block:
+            lines += ["", "results :"]
+        elif read_top:
+            lines += [
+                "read    : none of the top results could be opened - "
+                "links only",
+                "",
+                "results :",
+            ]
+        else:
+            lines += ["results :"]
+
         for index, (title, url) in enumerate(results[:8], start=1):
-            lines.append("  %d. %s" % (index, title))
+            marker = "  (read)" if url == read_url else ""
+            lines.append("  %d. %s%s" % (index, title, marker))
             lines.append("     %s" % url)
-        lines += ["", "Ask me to read one of them: look up <url>"]
+
+        lines += ["", "Ask for another page: look up <url>"]
+
+        if artifacts:
+            report.files = self._write_artifacts("web-search", artifacts)
 
         report.text = "\n".join(lines)
         self._record(report)

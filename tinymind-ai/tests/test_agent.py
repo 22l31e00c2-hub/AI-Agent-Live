@@ -648,6 +648,13 @@ class CapabilityRoutingTests(unittest.TestCase):
         self.assertIn("page.txt", [path.name for path in report.files])
 
     def test_explicit_search_intent_wins_over_recipe(self):
+        page = web.Page(
+            url="https://docs.qgis.org",
+            status=200,
+            content_type="text/html",
+            text="Buffer distance is in layer units.",
+            title="QGIS docs",
+        )
         with mock.patch(
             "cadagent.core.web.search",
             return_value=web.SearchOutcome(
@@ -655,17 +662,68 @@ class CapabilityRoutingTests(unittest.TestCase):
                 provider="wikipedia",
                 results=[("QGIS docs", "https://docs.qgis.org")],
             ),
+        ), mock.patch(
+            "cadagent.core.web.lookup",
+            return_value=web.Lookup(
+                page=page, sentences=["Buffer distance is in layer units."]
+            ),
         ):
             report = self.agent.answer("search the web for qgis buffer")
         self.assertEqual(report.capability, "web")
         self.assertIn("QGIS docs", report.text)
         self.assertIn("https://docs.qgis.org", report.text)
+        self.assertIn("layer units", report.text)
 
     def test_search_query_override_is_used(self):
         outcome = web.SearchOutcome(query="EPSG:25832", provider="wikipedia")
         with mock.patch("cadagent.core.web.search", return_value=outcome) as mocked:
             self.agent.search_report("EPSG:25832", query="EPSG:25832")
         mocked.assert_called_once_with("EPSG:25832", transport=None)
+
+    def test_search_reads_the_top_result_automatically(self):
+        markup = (
+            b"<html><body>"
+            b'<a class="result__a" href="https://docs.qgis.org/buffer.html">'
+            b"QGIS buffer algorithm</a>"
+            b'<a class="result__a" href="https://example.org/second">Second</a>'
+            b"</body></html>"
+        )
+        article = (
+            b"<html><head><title>QGIS buffer algorithm</title></head><body><p>"
+            b"The native buffer algorithm grows every geometry by a distance in "
+            b"layer units, so project the layer before you run it."
+            b"</p></body></html>"
+        )
+
+        def transport(url, timeout):
+            if "buffer.html" in url:
+                return 200, {"Content-Type": "text/html; charset=utf-8"}, article
+            return 200, {"Content-Type": "text/html; charset=utf-8"}, markup
+
+        report = self.agent.search_report("qgis native buffer", transport=transport)
+
+        self.assertFalse(report.error)
+        self.assertIn("read    : QGIS buffer algorithm", report.text)
+        self.assertIn("native buffer algorithm", report.text)
+        self.assertIn("page.txt", [path.name for path in report.files])
+
+    def test_search_keeps_the_link_list_when_the_top_page_fails(self):
+        markup = (
+            b"<html><body>"
+            b'<a class="result__a" href="https://example.org/blocked">'
+            b"Blocked page</a></body></html>"
+        )
+
+        def transport(url, timeout):
+            if "blocked" in url:
+                raise web.WebError("HTTP 403")
+            return 200, {"Content-Type": "text/html"}, markup
+
+        report = self.agent.search_report("qgis buffer", transport=transport)
+
+        self.assertFalse(report.error)
+        self.assertIn("skipped : https://example.org/blocked", report.text)
+        self.assertIn("https://example.org/blocked", report.text)
 
     def test_cad_task_still_wins(self):
         report = self.agent.answer("hatch closed polylines on layer PARCELS")
