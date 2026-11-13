@@ -1,0 +1,14 @@
+{
+  "model": "amu",
+  "checkpoint": "amu.pt",
+  "checkpoint_sha256": "a904ad8260f4c3aa102ee653b1dee1bcd472b246057cd5792fa5615265830965",
+  "parameters": 2923008,
+  "block_size": 128,
+  "vocab_size": 81,
+  "embed_dim": 256,
+  "heads": 8,
+  "kv_heads": 4,
+  "layers": 4,
+  "opset": 17,
+  "onnx_bytes": 11930767
+}

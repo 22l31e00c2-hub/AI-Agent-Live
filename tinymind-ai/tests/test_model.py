@@ -1,8 +1,8 @@
 """Neural-network tests for amu.
 
-torch lives only in the project virtualenv, so these tests skip (rather than
-fail) under an interpreter without it. Everything else in the suite is
-standard library only.
+These tests need torch, which lives in the project virtualenv. Run the suite
+with `python run_tests.py`: it switches to that interpreter and fails the run if
+any test was skipped. Everything else in the suite is standard library only.
 """
 
 import unittest

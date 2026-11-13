@@ -1,10 +1,11 @@
 """Local image inspection: what is in this picture, without a pretrained model.
 
 Nothing here is a neural network. The report is measurement - format, size,
-colour, ink coverage, edge density, EXIF - plus OCR when the tesseract binary
-happens to be installed. That makes it useful for QA of drawings and scans
-(is this sheet blank? is it linework or a photo? which EPSG-able metadata does
-the photo carry?) and honest about what it cannot do (understand semantics).
+colour, ink coverage, edge density, EXIF - plus line-level OCR with confidence
+when the tesseract binary is installed. That makes it useful for QA of drawings
+and scans (is this sheet blank? is it linework or a photo? which EPSG-able
+metadata does the photo carry?) and honest about what it cannot do (understand
+semantics).
 
 Pillow is optional: without it, amu explains how to install it instead of
 failing with an ImportError.
@@ -14,9 +15,10 @@ from __future__ import annotations
 
 import os
 import re
-import shutil
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Tuple
+
+from . import ocr
 
 try:                                   # Pillow is optional
     from PIL import Image, ImageFilter, ImageStat
@@ -28,13 +30,6 @@ except Exception:                      # pragma: no cover - import guard
     ImageStat = None
     TAGS = {}
     PIL_AVAILABLE = False
-
-try:                                   # OCR is optional twice over
-    import pytesseract
-    TESSERACT_PY = True
-except Exception:                      # pragma: no cover - import guard
-    pytesseract = None
-    TESSERACT_PY = False
 
 IMAGE_EXTS = "png|jpe?g|tif{1,2}|bmp|webp|gif"
 
@@ -70,6 +65,8 @@ class ImageReport:
     colours: List[Tuple[str, float]] = field(default_factory=list)
     exif: Dict[str, str] = field(default_factory=dict)
     ocr_text: str = ""
+    ocr_lines: int = 0
+    ocr_confidence: float = 0.0
     notes: List[str] = field(default_factory=list)
 
     @property
@@ -114,19 +111,6 @@ def _exif(handle) -> Dict[str, str]:
             continue
         summary[str(name)] = str(value)[:80]
     return summary
-
-
-def ocr_text(path: str) -> Tuple[str, str]:
-    """Return (text, reason_it_is_unavailable)."""
-    if not TESSERACT_PY:
-        return "", "install pytesseract and the tesseract binary to read text"
-    if not shutil.which("tesseract"):
-        return "", "the tesseract binary is not on PATH"
-    try:
-        with Image.open(path) as handle:
-            return pytesseract.image_to_string(handle).strip(), ""
-    except Exception as exc:
-        return "", "OCR failed: %s" % exc
 
 
 def inspect(path: str, run_ocr: bool = True) -> ImageReport:
@@ -209,10 +193,17 @@ def inspect(path: str, run_ocr: bool = True) -> ImageReport:
         )
 
     text = ""
+    line_count = 0
+    confidence = 0.0
     if run_ocr:
-        text, reason = ocr_text(path)
-        if reason:
-            notes.append("OCR unavailable: %s" % reason)
+        result = ocr.read(path)
+        text = result.text
+        line_count = len(result.lines)
+        confidence = result.confidence
+        if result.reason.startswith("no text"):
+            notes.append("OCR: no text found in this image")
+        elif result.reason:
+            notes.append("OCR unavailable: %s" % result.reason)
 
     return ImageReport(
         path=path,
@@ -231,6 +222,8 @@ def inspect(path: str, run_ocr: bool = True) -> ImageReport:
         colours=colours,
         exif=exif,
         ocr_text=text,
+        ocr_lines=line_count,
+        ocr_confidence=confidence,
         notes=notes,
     )
 
@@ -280,8 +273,16 @@ def describe(info: ImageReport) -> str:
 
     if info.ocr_text:
         preview = re.sub(r"\s+", " ", info.ocr_text)[:600]
-        lines.append("ocr      : %d characters" % len(info.ocr_text))
+        lines.append(
+            "ocr      : %d lines, %d characters, mean confidence %.0f%%"
+            % (info.ocr_lines, len(info.ocr_text), info.ocr_confidence)
+        )
         lines.append("text     : %s" % preview)
+        if info.ocr_confidence and info.ocr_confidence < 60.0:
+            lines.append(
+                "ocr note : low confidence; check rotation, contrast or try "
+                "AMU_OCR_PSM=6"
+            )
     elif "OCR unavailable" in " ".join(info.notes):
         lines.append("ocr      : not available")
 

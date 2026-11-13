@@ -1,52 +1,1772 @@
-Hello, my name is amu.
-I am an artificial intelligence model.
-I learn patterns from text.
-I use neural networks to predict the next character.
-Machine learning helps computers learn from data.
-Python is a programming language.
-A neural network contains layers of mathematical operations.
-Artificial intelligence can learn patterns from examples.
+amu corpus
 
-A drawing is the main container in AutoCAD, and it is saved as a DWG file.
-A layer groups objects that share a colour, a linetype and a lineweight.
-Before you draw, you create layers so that roads, parcels and contours stay separate.
-The command LAYER opens the layer manager, and the command -LAYER works on the command line.
-A polyline is a single object made of many segments, and PLINE draws one.
-A block is a reusable group of objects that you insert many times.
-An xref links another drawing into the current drawing instead of copying it.
-PURGE removes unused blocks, layers and linetypes, and AUDIT checks a drawing for errors.
-A script file with the extension SCR replays command line input inside AutoCAD.
-AutoLISP is the scripting language built into AutoCAD, and a LISP file ends with LSP.
-Coordinates in a drawing are expressed in drawing units, and units can be metres or millimetres.
+amu is a small language model trained from scratch on this text.
+amu reads one character at a time and predicts the next character.
+amu has no pretrained weights and no external service.
+The model is a character-level transformer, and the tokenizer is the set of characters in this file.
+The agent around amu is deterministic: it matches a request to a recipe and fills in the parameters.
+The model and the agent are separate, and the model does not route requests.
+Every sentence here is about drawing, mapping, building models or the scripts that change them.
 
-AutoCAD Map 3D adds geographic data to AutoCAD.
-Map 3D can import an ESRI shapefile and can export drawing objects back to a shapefile.
-A coordinate system describes how drawing coordinates map to positions on the earth.
-The EPSG code identifies a coordinate system, for example EPSG 25832 is ETRS89 UTM zone 32 North.
-A topology describes how lines connect to each other and where polygons share a boundary.
-Map Cleanup fixes small gaps, overshoots and duplicate geometry before analysis.
-Feature Data Objects connect a drawing to a spatial database such as PostGIS or Oracle.
+AutoCAD drawing basics
 
-Revit is a building information modelling application.
-A Revit model is stored in an RVT file and is organised by categories such as walls and doors.
-A level is a horizontal reference plane, and every wall is hosted by a level.
-A family is a parametric component, and a family instance is one placement of that component.
-A schedule reads parameters from elements and lists them in a table.
-A sheet is a printable page that holds views, and sheets can be exported to PDF in one batch.
-A transaction groups changes to a model so that they are saved or undone together.
-The Revit API is accessed with Python through pyRevit or Dynamo.
-pyRevit runs a Python script inside a running model and can open many models in a row.
+A drawing that mixes metres and millimetres will not measure correctly, so agree on units first. Model space holds the geometry, and paper space holds the layouts that print it. A viewport can freeze a layer for one layout without freezing it in the model.
 
-QGIS is a free geographic information system.
-A QGIS project is saved as a QGZ file, and a geopackage stores layers in one SQLite file.
-QGIS reads a shapefile with the OGR provider and writes a geopackage layer.
-The processing toolbox runs algorithms such as buffer, clip, dissolve and spatial join.
-The command qgis process runs the same algorithms without a graphical interface.
-PyQGIS is the Python interface of QGIS, and it exposes layers, features and geometry.
-To reproject a layer you change its coordinate reference system to another EPSG code.
-A spatial join transfers attributes from one layer to another based on location.
-A buffer creates a polygon at a fixed distance around each feature.
+A layout holds a title block and one or more viewports, and each viewport shows model space at a chosen scale. Layer 0 is special: objects on layer 0 take the properties of the block that contains them. The command ZOOM with the option Extents fits the drawing to the screen, which is useful after an import. An object has a colour, a layer, a linetype and a lineweight, and each of them can be set directly or by layer.
 
-Good practice is to keep one layer per theme and one unit system per drawing.
-Good practice is to audit and purge a drawing before you deliver it.
-Good practice is to project every layer to the same coordinate system before analysis.
+Automation safety
+
+Back up the drawing before a batch, and keep the backup until the batch is checked. Pin the tool version, because an algorithm that changes behaviour changes your result. Run the audit before and after, and compare the counts. A script that deletes or overwrites needs a confirmation flag before it runs. A path from a request is data, not code, and it should be quoted as data.
+
+A dry run prints the steps without touching data, and it costs seconds. An allowlist of binaries is safer than a blocklist, because a blocklist always misses one. Generate the script, read it, then run it, because a script repeats every mistake you make very fast. Keep the source data read only, and write results into a new folder.
+
+AutoLISP
+
+The function defun creates a command, and a command whose name starts with c: can be typed at the prompt. A LISP file that is loaded with APPLOAD stays in memory until the drawing closes. AutoLISP is the scripting language built into AutoCAD, and a program is stored in a LSP file.
+
+The function setq assigns a value, and the function list builds a list. A selection set can be iterated with ssname and sslength, and a loop over it edits one entity at a time. A LISP file that is loaded with APPLOAD stays in memory until the drawing closes.
+
+OCR and scanned drawings
+
+A confidence of ninety or more is usually correct, and a confidence of thirty is usually wrong. The OCR output is saved as text next to the image, so the next step does not repeat the work. A title block is the easiest text to read, because the letters are large and the contrast is high.
+
+A page segmentation mode of six treats the page as one uniform block of text. The OCR text is a hint for the operator, not a source of coordinates. A table comes back as loose words, so the columns have to be rebuilt from their coordinates.
+
+A page segmentation mode of six treats the page as one uniform block of text. The OCR output is saved as text next to the image, so the next step does not repeat the work. A table comes back as loose words, so the columns have to be rebuilt from their coordinates. A rotated scan is deskewed before OCR, otherwise every line comes back as fragments.
+
+Glossary
+
+A feature is one row of geometry and attributes in a vector layer. A spatial index is a lookup structure that makes a location query fast. A nodata value marks a cell with no measurement, and it is not the same as zero. A topology is a set of rules about how features connect and share edges. A centroid is the centre of mass of a geometry, and it can fall outside a concave polygon.
+
+A topology is a set of rules about how features connect and share edges. A dissolve merges features that share a value into one feature. A segment is the straight piece between two vertices. A bounding box is the smallest rectangle that contains a geometry.
+
+A viewport is a window on a layout that shows model space. A topology is a set of rules about how features connect and share edges. A feature is one row of geometry and attributes in a vector layer.
+
+Coordinates and projections
+
+A datum shift can move features by metres, so never assume that two systems agree. A transformation between two datums can need a grid file, and without it the result is only approximate. EPSG 3857 is WGS 84 / Pseudo-Mercator, and a coordinate in it is given in metres. A PRJ file stores the coordinate system of a shapefile, and a missing PRJ means an unknown system. The zone number in a UTM system changes every six degrees of longitude.
+
+The command ogr2ogr can reproject while it converts, with the option -t_srs. The zone number in a UTM system changes every six degrees of longitude. EPSG 2154 is RGF93 / Lambert-93, and a coordinate in it is given in metres.
+
+EPSG 32633 is WGS 84 / UTM zone 33N, and a coordinate in it is given in metres. A false easting keeps coordinates positive, and a false northing does the same for the other axis. A geographic coordinate system uses latitude and longitude, and a projected coordinate system uses metres on a flat surface. Store coordinates in the system you will analyse in, and reproject at the edge of the work.
+
+Revit and building data
+
+A level is a horizontal reference plane, and every wall is hosted by one. Purge unused families before delivery, because an RVT file carries everything it ever held. Shared parameters travel between projects, and project parameters stay in one model. A workset splits a model so that several people can work in it at the same time.
+
+Revit stores a building model in an RVT file and organises it by categories, families and types. A filter collects elements by category and parameter, and a collector without a filter returns the whole model. A sheet is a printable page that holds views, and sheets export to PDF in a batch. A level is a horizontal reference plane, and every wall is hosted by one. An element id is stable inside one model, and it is not a reliable key between models.
+
+A filter collects elements by category and parameter, and a collector without a filter returns the whole model. Read the model before you write to it, because a script that guesses will overwrite work. An element id is stable inside one model, and it is not a reliable key between models. A sheet is a printable page that holds views, and sheets export to PDF in a batch.
+
+PyQGIS and qgis_process
+
+An algorithm name looks like native:buffer, and the prefix names the provider that supplies it. The method addMapLayer adds a layer to the project, and the method removeMapLayer takes it away. A memory layer keeps features in memory, which is useful for a result that does not need saving.
+
+A print layout is exported with the class QgsLayoutExporter, and the format is set on the export settings. An algorithm name looks like native:buffer, and the prefix names the provider that supplies it. The class QgsProject holds the open project, and the method mapLayers returns its layers. A feedback object carries progress and cancellation, and a long job should check it.
+
+A script that runs inside QGIS has a running application, and a script that runs outside it must create one. A feature is read with getFeatures, and each feature carries a geometry and a set of attributes. A memory layer keeps features in memory, which is useful for a result that does not need saving. The class QgsProject holds the open project, and the method mapLayers returns its layers. A vector layer is opened with QgsVectorLayer, and the second argument names the provider.
+
+AutoCAD Map 3D
+
+A drawing that arrives without a coordinate system is a sketch, not a map. A shapefile is a set of files, and the DBF file holds the attributes that the SHP file cannot. The command MAPIMPORT brings a shapefile into the drawing, and the command MAPEXPORT writes drawing objects back out. The command MAPCLEAN closes small gaps, removes duplicates and fixes overshoots.
+
+A drawing that arrives without a coordinate system is a sketch, not a map. The command MAPIMPORT brings a shapefile into the drawing, and the command MAPEXPORT writes drawing objects back out. A topology records how lines connect and where polygons share a boundary.
+
+Delivery notes
+
+A zip file with a flat folder is easier to open than a deep tree of folders. A PDF is for review, and the DWG is for editing, so send both when both are needed. Record the coordinate system in the note, because a later reader cannot recover it from the geometry alone. Keep a copy of the inputs next to the outputs when the job is small. Remove the temporary files before you zip, and check the archive by opening it.
+
+A PDF is for review, and the DWG is for editing, so send both when both are needed. Deliver the drawing, the source data, the script and a short note that says what changed. A plot style is part of the deliverable, because a drawing that prints black is not the drawing you approved. Remove the temporary files before you zip, and check the archive by opening it. A delivery note is short: what it is, what changed, what is missing.
+
+A drawing that has been audited, purged and saved is ready to send. Remove the temporary files before you zip, and check the archive by opening it. A zip file with a flat folder is easier to open than a deep tree of folders.
+
+Troubleshooting
+
+If a shapefile will not open, check that the SHX and DBF files sit next to the SHP file. If a script stops halfway, run it line by line and find the first prompt that differs. If a dialog appears in a script, the script is waiting for an answer that will never come. If a PDF is blank, check the plot window and the page setup.
+
+If an export is empty, check the selection and the layer visibility. If a PDF is blank, check the plot window and the page setup. If a layer is missing, check that the name matches exactly, because a script does not guess. If a shapefile will not open, check that the SHX and DBF files sit next to the SHP file. If a buffer looks wrong, check the units of the distance.
+
+If the model is slow, check the number of open drawings and the size of the cache. If an export is empty, check the selection and the layer visibility. If a dialog appears in a script, the script is waiting for an answer that will never come.
+
+Writing scripts
+
+Keep every function short, because a long function is hard to review before it runs. Test the program on a copy of the drawing, then read its output before running it on the real model. Quote every path and every layer name, because a space or a quote breaks an unquoted command. Write the output path into the script, and never overwrite the input file. A Python script for QGIS needs a QgsApplication when it runs outside the desktop.
+
+An error handler rolls the transaction back and prints the message, so a failure leaves no partial work. The script prints a summary line with the counts of created, changed and skipped objects. The header of a script names the drawing, the date and the recipe that produced it.
+
+Data exchange
+
+A coordinate pair in a CSV needs a declared order, because latitude first and longitude first look alike. A GeoPackage stores many layers, long field names and spatial indexes in one file. A field name longer than ten characters is truncated by a shapefile, and the truncation can collide. Run a count before and after a conversion, and compare the totals. Check the extent after a reprojection, because a wrong zone moves the whole dataset.
+
+A field name longer than ten characters is truncated by a shapefile, and the truncation can collide. A SHP file stores geometry and attributes, and it loses styling, labels and relationships. A DXF file stores drawing geometry and layers, and it is the safest exchange format for AutoCAD. Every format loses something, so decide what matters before you convert.
+
+QGIS
+
+A buffer builds a polygon at a fixed distance around each feature, and a negative distance shrinks it. The field calculator evaluates an expression for every feature and writes the result into a field. A QGIS project is saved as a QGZ file, and a GeoPackage stores many layers in one SQLite file. The processing toolbox runs buffer, clip, dissolve, intersection and spatial join. A print layout holds a map, a legend, a scale bar and a title, and it exports to PDF.
+
+Save the style with the layer, because a colour ramp lost on reload is work you repeat. The field calculator evaluates an expression for every feature and writes the result into a field. Reproject a layer when its coordinate reference system does not match the project. A buffer builds a polygon at a fixed distance around each feature, and a negative distance shrinks it.
+
+Layers and scripts
+
+Colour, linetype and lineweight belong to the layer, not to the object, when objects use BYLAYER. The layer TEXT is drawn in yellow so that the plot reads cleanly. A layer filter groups layers by name, and a saved filter makes a large layer list usable. A script sets the current layer, draws, and restores the previous layer before it ends. The command -LAYER changes layer state from the command line, which is what a script needs.
+
+Freeze a layer when its objects should not be computed, and turn it off when they should only be hidden. A script sets the current layer, draws, and restores the previous layer before it ends. The GRID layer and the TREES layer stay separate, because the plot style treats them differently. The command LAYERP opens the layer properties manager, and -LAYER works without a dialog.
+
+A layer filter groups layers by name, and a saved filter makes a large layer list usable. Lock a layer when you want to see it but not edit it, because a locked object cannot be selected for editing. The layer STREETLIGHTS is drawn in white so that the plot reads cleanly.
+
+Example sessions
+User: create levels at 0, 3.5, 7, 10.5
+amu: Recipe revit.create_levels matched. Wrote create_levels.py, which opens one transaction and creates four levels.
+User: what can you do
+amu: amu writes scripts for Revit, AutoCAD, AutoCAD Map 3D and QGIS, reads web pages, and measures images.
+User: export attributes of blocks to csv
+amu: Recipe autocad.attributes_to_csv matched. Wrote att2csv.lsp, which writes one row per block reference.
+User: describe site_plan.png
+amu: The image is 2400 by 1700 pixels, with 4.2 percent ink coverage and content that reaches the right edge.
+User: audit and purge this drawing
+amu: Recipe autocad.audit_purge matched. Wrote audit_purge.scr, and the note says to run it on a copy first.
+
+Code: create layers in AutoLISP
+
+(defun c:TMK-LAYERS ( / layers )
+  (setq layers '(
+    ("ROADS" 1)
+    ("PARCELS" 2)
+    ("CONTOURS" 3)
+  ))
+  (foreach item layers
+    (if (not (tblsearch "LAYER" (car item)))
+      (command "-LAYER" "New" (car item) "Color" (cadr item) (car item) "")
+    )
+  )
+  (princ)
+)
+
+Code: read a title block with pytesseract
+
+from PIL import Image
+import pytesseract
+
+image = Image.open("title_block.png").convert("L")
+text = pytesseract.image_to_string(image, config="--psm 6")
+print(text)
+
+OCR and scanned drawings
+
+If OCR finds nothing, check that the image is not blank and that the text is not lighter than the background. The page segmentation mode tells tesseract how to divide the page into blocks. The OCR pass reads the title block and returns the project name and the sheet number.
+
+OCR returns text, not geometry: a detected label still needs a check against the drawing. Languages are named by their traineddata file, for example eng or deu. A rotated scan is deskewed before OCR, otherwise every line comes back as fragments. Upscale a small scan before OCR, because tesseract expects around three hundred dots per inch. The OCR pass reads the title block and returns the project name and the sheet number.
+
+A table comes back as loose words, so the columns have to be rebuilt from their coordinates. OCR returns text, not geometry: a detected label still needs a check against the drawing. The OCR pass reads the title block and returns the project name and the sheet number. A confidence of ninety or more is usually correct, and a confidence of thirty is usually wrong.
+
+Coordinates and projections
+
+Store coordinates in the system you will analyse in, and reproject at the edge of the work. A coordinate without a system is a number without a meaning. The zone number in a UTM system changes every six degrees of longitude. A false easting keeps coordinates positive, and a false northing does the same for the other axis. A projection always distorts something, so choose one that keeps the measurement you care about.
+
+Check the extent after a reprojection, because a wrong zone moves the whole dataset. A false easting keeps coordinates positive, and a false northing does the same for the other axis. A transformation between two datums can need a grid file, and without it the result is only approximate. The command ogr2ogr can reproject while it converts, with the option -t_srs.
+
+Troubleshooting
+
+If a PDF is blank, check the plot window and the page setup. If features land in the wrong place, check the coordinate system before you move anything. If a command is unknown, check the application version, because commands move between releases. If a buffer looks wrong, check the units of the distance.
+
+If a shapefile will not open, check that the SHX and DBF files sit next to the SHP file. If the model is slow, check the number of open drawings and the size of the cache. If a polygon has a hole, check the ring order and the closing point. If a PDF is blank, check the plot window and the page setup. If a layer is missing, check that the name matches exactly, because a script does not guess.
+
+AutoLISP
+
+An entity name is valid until the entity is deleted, so finish reading it before you erase it. The function command calls an AutoCAD command, and it expects the same answers that you would type. The function defun creates a command, and a command whose name starts with c: can be typed at the prompt. The function ssget builds a selection set, and the filter (cons 8 "ROADS") selects one layer. A command that begins with c: runs like a built-in command, and a function without c: must be called from another program.
+
+AutoLISP is the scripting language built into AutoCAD, and a program is stored in a LSP file. A command that begins with c: runs like a built-in command, and a function without c: must be called from another program. The function setq assigns a value, and the function list builds a list. Check the parentheses before you load a program, because one missing parenthesis stops the whole file. A selection set can be iterated with ssname and sslength, and a loop over it edits one entity at a time.
+
+Data exchange
+
+A SHP file stores geometry and attributes, and it loses styling, labels and relationships. Run a count before and after a conversion, and compare the totals. A DXF file with a different unit setting can arrive ten times too large or ten times too small.
+
+A GeoPackage stores many layers, long field names and spatial indexes in one file. A checksum of the source makes a repeatable conversion verifiable. An export that keeps object data is not the same as an export that keeps plain attributes, so say which one the receiver needs.
+
+A SHP file stores geometry and attributes, and it loses styling, labels and relationships. A checksum of the source makes a repeatable conversion verifiable. Keep the source file read only, and write every result into a new folder.
+
+AutoCAD Map 3D
+
+EPSG 28992 is Amersfoort / RD New, measured in metres, and it is used in the Netherlands. The command MAPIMPORT brings a shapefile into the drawing, and the command MAPEXPORT writes drawing objects back out. A drawing that arrives without a coordinate system is a sketch, not a map. Object data lives inside the drawing, and a feature data object connection lives outside it. AutoCAD Map 3D adds geographic data to AutoCAD, and the drawing stays the centre of the work.
+
+AutoCAD Map 3D adds geographic data to AutoCAD, and the drawing stays the centre of the work. The command MAPIMPORT brings a shapefile into the drawing, and the command MAPEXPORT writes drawing objects back out. A topology records how lines connect and where polygons share a boundary.
+
+Automation safety
+
+Keep the working folder small, because a folder with ten thousand files slows every tool. Keep the source data read only, and write results into a new folder. Generate the script, read it, then run it, because a script repeats every mistake you make very fast.
+
+Test a script on a copy of the drawing, never on the only copy. A confirmation prompt is not a security boundary when the same flag can be passed by a script. A script that deletes or overwrites needs a confirmation flag before it runs. Back up the drawing before a batch, and keep the backup until the batch is checked. Run the audit before and after, and compare the counts.
+
+PyQGIS and qgis_process
+
+The processing module runs an algorithm with run, and the parameters are passed as a dictionary. A memory layer keeps features in memory, which is useful for a result that does not need saving. An algorithm name looks like native:buffer, and the prefix names the provider that supplies it. The class QgsProject holds the open project, and the method mapLayers returns its layers.
+
+The class QgsCoordinateTransform changes coordinates between two reference systems. The class QgsProject holds the open project, and the method mapLayers returns its layers. A print layout is exported with the class QgsLayoutExporter, and the format is set on the export settings.
+
+The class QgsProject holds the open project, and the method mapLayers returns its layers. A print layout is exported with the class QgsLayoutExporter, and the format is set on the export settings. A vector layer is opened with QgsVectorLayer, and the second argument names the provider. A memory layer keeps features in memory, which is useful for a result that does not need saving.
+
+Glossary
+
+A sliver is a long thin polygon created by an imperfect overlay. A polygon is a closed area bounded by one outer ring and any number of inner rings. An attribute is a value attached to a feature, and a field is the column that holds it.
+
+A topology is a set of rules about how features connect and share edges. A viewport is a window on a layout that shows model space. A segment is the straight piece between two vertices. A centroid is the centre of mass of a geometry, and it can fall outside a concave polygon.
+
+Layers and scripts
+
+The PARCELS layer and the PIPES layer stay separate, because they print at different scales. Name layers in a fixed pattern so that a filter, a query or an export can find them later. Create the DIMENSIONS layer before drawing, so that every object lands in the right place. The layer STREETLIGHTS is drawn in white so that the plot reads cleanly. Colour, linetype and lineweight belong to the layer, not to the object, when objects use BYLAYER.
+
+Create the CONTOURS layer before drawing, so that every object lands in the right place. A script sets the current layer, draws, and restores the previous layer before it ends. The layer DIMENSIONS is drawn in green so that the plot reads cleanly. The command -LAYER changes layer state from the command line, which is what a script needs. A layer with no objects is not free to keep if it also carries a plot style that nobody understands.
+
+A layer filter groups layers by name, and a saved filter makes a large layer list usable. Colour, linetype and lineweight belong to the layer, not to the object, when objects use BYLAYER. Name layers in a fixed pattern so that a filter, a query or an export can find them later. A script that creates layers twice fails on the second run unless it checks whether the layer exists. A layer with no objects is not free to keep if it also carries a plot style that nobody understands.
+
+QGIS
+
+A QGIS project is saved as a QGZ file, and a GeoPackage stores many layers in one SQLite file. QGIS is a free geographic information system that runs on Windows, macOS and Linux. The field calculator evaluates an expression for every feature and writes the result into a field. The layer panel shows the drawing order, and the layer on top hides everything below it.
+
+The command qgis_process runs those algorithms without a window, which makes it usable from a script. A spatial join copies attributes from the layer you join onto the layer you join to. QGIS is a free geographic information system that runs on Windows, macOS and Linux. A buffer builds a polygon at a fixed distance around each feature, and a negative distance shrinks it. A temporary scratch layer disappears when the project closes, so copy it before you close.
+
+QGIS is a free geographic information system that runs on Windows, macOS and Linux. A QGIS project is saved as a QGZ file, and a GeoPackage stores many layers in one SQLite file. A print layout holds a map, a legend, a scale bar and a title, and it exports to PDF. Reproject a layer when its coordinate reference system does not match the project.
+
+Writing scripts
+
+The header of a script names the drawing, the date and the recipe that produced it. Test the program on a copy of the drawing, then read its output before running it on the real model. Print what the program did, so the operator can see the result without opening the file. Keep every function short, because a long function is hard to review before it runs.
+
+The script prints a summary line with the counts of created, changed and skipped objects. Keep every function short, because a long function is hard to review before it runs. Write the output path into the script, and never overwrite the input file. A comment above a block explains why the block exists, not what each line does.
+
+Keep the command line and the script in the same folder, so the two do not drift apart. One recipe writes one artifact, so a failed run leaves one file to delete. Write the output path into the script, and never overwrite the input file. A script that runs twice should produce the same result, or it should refuse the second run.
+
+Delivery notes
+
+Record the tool version in the note, because a result without a version cannot be repeated. A PDF is for review, and the DWG is for editing, so send both when both are needed. Name the output with the date and the recipe, so a later run does not overwrite an earlier one.
+
+Name the output with the date and the recipe, so a later run does not overwrite an earlier one. Deliver the drawing, the source data, the script and a short note that says what changed. A delivery note is short: what it is, what changed, what is missing.
+
+A delivery note is short: what it is, what changed, what is missing. Deliver the drawing, the source data, the script and a short note that says what changed. A zip file with a flat folder is easier to open than a deep tree of folders. Keep a copy of the inputs next to the outputs when the job is small. Name the output with the date and the recipe, so a later run does not overwrite an earlier one.
+
+AutoCAD drawing basics
+
+A block is a reusable group of objects, and one edit to the block updates every insertion. A script with the SCR extension replays command line input, one line for every prompt. A template drawing with the right layers and styles removes that work from every new drawing. An xref links another drawing into the current drawing instead of copying its objects.
+
+A script with the SCR extension replays command line input, one line for every prompt. Layer 0 is special: objects on layer 0 take the properties of the block that contains them. Model space holds the geometry, and paper space holds the layouts that print it. A viewport can freeze a layer for one layout without freezing it in the model. A polyline is one object with many segments, and PLINE draws it segment by segment.
+
+A viewport can freeze a layer for one layout without freezing it in the model. A drawing that mixes metres and millimetres will not measure correctly, so agree on units first. Layer 0 is special: objects on layer 0 take the properties of the block that contains them.
+
+Revit and building data
+
+Revit stores a building model in an RVT file and organises it by categories, families and types. A family is a parametric component, and a family instance is one placement of it. Read the model before you write to it, because a script that guesses will overwrite work.
+
+The document class gives access to the model, and the active view is not always the view you want. A warning in Revit is not an error, but a batch of warnings usually hides one. A workset splits a model so that several people can work in it at the same time. A level is a horizontal reference plane, and every wall is hosted by one.
+
+Example sessions
+User: create levels at 0, 3.5, 7, 10.5
+amu: Recipe revit.create_levels matched. Wrote create_levels.py, which opens one transaction and creates four levels.
+User: audit and purge this drawing
+amu: Recipe autocad.audit_purge matched. Wrote audit_purge.scr, and the note says to run it on a copy first.
+User: reproject parcels.shp to EPSG:25832
+amu: Recipe qgis.reproject matched. Wrote reproject.py and the qgis_process command with -t_srs EPSG:25832.
+User: search the web for qgis native buffer
+amu: The search returned a QGIS documentation page, and the agent read the top result before answering.
+User: describe site_plan.png
+amu: The image is 2400 by 1700 pixels, with 4.2 percent ink coverage and content that reaches the right edge.
+
+Code: create levels in pyRevit
+
+from Autodesk.Revit.DB import Level, Transaction
+
+doc = __revit__.ActiveUIDocument.Document
+elevations = [0.0, 3.5, 7.0, 10.5]
+
+transaction = Transaction(doc, "Create levels")
+transaction.Start()
+try:
+    for elevation in elevations:
+        Level.Create(doc, elevation)
+    transaction.Commit()
+except Exception:
+    transaction.RollBack()
+    raise
+
+Code: export block handles in AutoLISP
+
+(defun c:TMK-ATT2CSV ( / ss file index entity handle block )
+  (setq ss (ssget "_X" '((0 . "INSERT"))))
+  (setq file (open "C:/work/attributes.csv" "w"))
+  (write-line "handle,block" file)
+  (setq index 0)
+  (while (< index (sslength ss))
+    (setq entity (ssname ss index))
+    (setq handle (cdr (assoc 5 (entget entity))))
+    (setq block (cdr (assoc 2 (entget entity))))
+    (write-line (strcat handle "," block) file)
+    (setq index (1+ index))
+  )
+  (close file)
+  (princ)
+)
+
+OCR and scanned drawings
+
+The page segmentation mode tells tesseract how to divide the page into blocks. The OCR output is saved as text next to the image, so the next step does not repeat the work. A confidence of ninety or more is usually correct, and a confidence of thirty is usually wrong.
+
+A table comes back as loose words, so the columns have to be rebuilt from their coordinates. A title block is the easiest text to read, because the letters are large and the contrast is high. A page segmentation mode of six treats the page as one uniform block of text.
+
+Glossary
+
+A sliver is a long thin polygon created by an imperfect overlay. A viewport is a window on a layout that shows model space. A centroid is the centre of mass of a geometry, and it can fall outside a concave polygon.
+
+A spatial index is a lookup structure that makes a location query fast. A raster cell is one square of a grid, and its value is the measurement stored there. A segment is the straight piece between two vertices.
+
+A spatial index is a lookup structure that makes a location query fast. A viewport is a window on a layout that shows model space. A ring is a closed line that bounds a polygon. A sliver is a long thin polygon created by an imperfect overlay.
+
+PyQGIS and qgis_process
+
+The method commitChanges saves edits to the data source, and the method rollBack undoes them. The distance parameter of a buffer is in the units of the layer, not in the units of the project. A vector layer is opened with QgsVectorLayer, and the second argument names the provider.
+
+An algorithm name looks like native:buffer, and the prefix names the provider that supplies it. A field that does not exist is created with a field definition and an edit buffer, and the change is committed after the loop. The distance parameter of a buffer is in the units of the layer, not in the units of the project. The method commitChanges saves edits to the data source, and the method rollBack undoes them.
+
+AutoCAD drawing basics
+
+A template drawing with the right layers and styles removes that work from every new drawing. A drawing that mixes metres and millimetres will not measure correctly, so agree on units first. A layout holds a title block and one or more viewports, and each viewport shows model space at a chosen scale.
+
+The command UNITS sets the units of the drawing, and the command INSUNITS records them for other applications. The command ZOOM with the option Extents fits the drawing to the screen, which is useful after an import. A drawing that mixes metres and millimetres will not measure correctly, so agree on units first. A layout holds a title block and one or more viewports, and each viewport shows model space at a chosen scale. An object has a colour, a layer, a linetype and a lineweight, and each of them can be set directly or by layer.
+
+An object has a colour, a layer, a linetype and a lineweight, and each of them can be set directly or by layer. The command ZOOM with the option Extents fits the drawing to the screen, which is useful after an import. A layout holds a title block and one or more viewports, and each viewport shows model space at a chosen scale. A block is a reusable group of objects, and one edit to the block updates every insertion. The command AUDIT checks a drawing for errors, and the command PURGE removes unused blocks, layers and linetypes.
+
+AutoLISP
+
+The function defun creates a command, and a command whose name starts with c: can be typed at the prompt. The function ssget builds a selection set, and the filter (cons 8 "ROADS") selects one layer. Check the parentheses before you load a program, because one missing parenthesis stops the whole file. Read the command line prompts before you script a command, because every option changes the sequence of answers.
+
+A LISP file that is loaded with APPLOAD stays in memory until the drawing closes. An entity name is valid until the entity is deleted, so finish reading it before you erase it. Read the command line prompts before you script a command, because every option changes the sequence of answers.
+
+QGIS
+
+Reproject a layer when its coordinate reference system does not match the project. A spatial join copies attributes from the layer you join onto the layer you join to. The field calculator evaluates an expression for every feature and writes the result into a field. A print layout holds a map, a legend, a scale bar and a title, and it exports to PDF.
+
+A buffer builds a polygon at a fixed distance around each feature, and a negative distance shrinks it. A print layout holds a map, a legend, a scale bar and a title, and it exports to PDF. The processing toolbox runs buffer, clip, dissolve, intersection and spatial join. The layer panel shows the drawing order, and the layer on top hides everything below it.
+
+Automation safety
+
+Log every change with the file, the recipe and the time, so a bad run can be traced. A script that deletes or overwrites needs a confirmation flag before it runs. Test a script on a copy of the drawing, never on the only copy. Pin the tool version, because an algorithm that changes behaviour changes your result.
+
+Keep the source data read only, and write results into a new folder. A confirmation prompt is not a security boundary when the same flag can be passed by a script. Run the audit before and after, and compare the counts. A script that deletes or overwrites needs a confirmation flag before it runs.
+
+AutoCAD Map 3D
+
+Do not mix drawing units, because a line drawn in millimetres will not line up with a parcel measured in metres. A drawing that arrives without a coordinate system is a sketch, not a map. A coordinate system maps drawing coordinates to positions on the earth, and an EPSG code names that system. Map 3D keeps the original drawing objects, so an import can be reversed more easily than a conversion. A topology records how lines connect and where polygons share a boundary.
+
+EPSG 25833 is ETRS89 / UTM zone 33N, measured in metres, and it is used in eastern Europe. A shapefile is a set of files, and the DBF file holds the attributes that the SHP file cannot. Map 3D keeps the original drawing objects, so an import can be reversed more easily than a conversion.
+
+The command MAPCLEAN closes small gaps, removes duplicates and fixes overshoots. A shapefile is a set of files, and the DBF file holds the attributes that the SHP file cannot. AutoCAD Map 3D adds geographic data to AutoCAD, and the drawing stays the centre of the work.
+
+Coordinates and projections
+
+Store coordinates in the system you will analyse in, and reproject at the edge of the work. A PRJ file stores the coordinate system of a shapefile, and a missing PRJ means an unknown system. Reprojection changes coordinates, not the shapes on the ground. A coordinate without a system is a number without a meaning.
+
+A datum shift can move features by metres, so never assume that two systems agree. A coordinate without a system is a number without a meaning. A transformation between two datums can need a grid file, and without it the result is only approximate. Store coordinates in the system you will analyse in, and reproject at the edge of the work. Web Mercator is convenient for tiled maps and wrong for area measurements.
+
+A geographic coordinate system uses latitude and longitude, and a projected coordinate system uses metres on a flat surface. EPSG 3857 is WGS 84 / Pseudo-Mercator, and a coordinate in it is given in metres. A datum shift can move features by metres, so never assume that two systems agree.
+
+Troubleshooting
+
+If a dialog appears in a script, the script is waiting for an answer that will never come. If features land in the wrong place, check the coordinate system before you move anything. If a command is unknown, check the application version, because commands move between releases. If a script stops halfway, run it line by line and find the first prompt that differs.
+
+If a file is locked, check for a second application that still has it open. If a shapefile will not open, check that the SHX and DBF files sit next to the SHP file. If a PDF is blank, check the plot window and the page setup.
+
+If a PDF is blank, check the plot window and the page setup. If a script stops halfway, run it line by line and find the first prompt that differs. If a command is unknown, check the application version, because commands move between releases. If a polygon has a hole, check the ring order and the closing point. If a join returns nothing, check the field type, because text and numbers do not match.
+
+Writing scripts
+
+A Python script for QGIS needs a QgsApplication when it runs outside the desktop. A comment above a block explains why the block exists, not what each line does. Write the output path into the script, and never overwrite the input file.
+
+A comment above a block explains why the block exists, not what each line does. An error handler rolls the transaction back and prints the message, so a failure leaves no partial work. Quote every path and every layer name, because a space or a quote breaks an unquoted command.
+
+Layers and scripts
+
+Create the WATER layer before drawing, so that every object lands in the right place. Lock a layer when you want to see it but not edit it, because a locked object cannot be selected for editing. The layer GRID is drawn in cyan so that the plot reads cleanly. A layer filter groups layers by name, and a saved filter makes a large layer list usable. The STREETLIGHTS layer and the ROADS layer stay separate, because the plot style treats them differently.
+
+The PARCELS layer and the TEXT layer stay separate, because one is existing and one is proposed. The layer ROADS is drawn in blue so that the plot reads cleanly. A script that creates layers twice fails on the second run unless it checks whether the layer exists. A script sets the current layer, draws, and restores the previous layer before it ends. Name layers in a fixed pattern so that a filter, a query or an export can find them later.
+
+The SEWER layer and the BUILDINGS layer stay separate, because they print at different scales. A layer with no objects is not free to keep if it also carries a plot style that nobody understands. Create the PIPES layer before drawing, so that every object lands in the right place. The command -PURGE with the option All removes the unused layers that a script leaves behind. Name layers in a fixed pattern so that a filter, a query or an export can find them later.
+
+Revit and building data
+
+A family is a parametric component, and a family instance is one placement of it. A type holds the dimensions, and an instance holds the position. Shared parameters travel between projects, and project parameters stay in one model.
+
+A transaction groups changes so that they are saved or undone together. A family is a parametric component, and a family instance is one placement of it. A filter collects elements by category and parameter, and a collector without a filter returns the whole model.
+
+Data exchange
+
+A checksum of the source makes a repeatable conversion verifiable. A coordinate pair in a CSV needs a declared order, because latitude first and longitude first look alike. Check the extent after a reprojection, because a wrong zone moves the whole dataset.
+
+A GeoPackage stores many layers, long field names and spatial indexes in one file. A date field is text in a shapefile and a real date in a GeoPackage, so check it after a conversion. A CSV file stores attributes without geometry, so a coordinate pair must be carried in two fields. A checksum of the source makes a repeatable conversion verifiable.
+
+Keep the source file read only, and write every result into a new folder. A checksum of the source makes a repeatable conversion verifiable. A date field is text in a shapefile and a real date in a GeoPackage, so check it after a conversion. Every format loses something, so decide what matters before you convert.
+
+Delivery notes
+
+A delivery note is short: what it is, what changed, what is missing. A plot style is part of the deliverable, because a drawing that prints black is not the drawing you approved. Deliver the drawing, the source data, the script and a short note that says what changed.
+
+A plot style is part of the deliverable, because a drawing that prints black is not the drawing you approved. A drawing that has been audited, purged and saved is ready to send. Remove the temporary files before you zip, and check the archive by opening it.
+
+Record the tool version in the note, because a result without a version cannot be repeated. Keep a copy of the inputs next to the outputs when the job is small. A delivery note is short: what it is, what changed, what is missing.
+
+Example sessions
+User: reproject parcels.shp to EPSG:25832
+amu: Recipe qgis.reproject matched. Wrote reproject.py and the qgis_process command with -t_srs EPSG:25832.
+User: what can you do
+amu: amu writes scripts for Revit, AutoCAD, AutoCAD Map 3D and QGIS, reads web pages, and measures images.
+User: audit and purge this drawing
+amu: Recipe autocad.audit_purge matched. Wrote audit_purge.scr, and the note says to run it on a copy first.
+User: buffer roads by 25 metres and clip to parcels
+amu: Recipe qgis.buffer_clip matched. Wrote the PyQGIS script with a 25 metre buffer and a clip to the parcel layer.
+User: create levels at 0, 3.5, 7, 10.5
+amu: Recipe revit.create_levels matched. Wrote create_levels.py, which opens one transaction and creates four levels.
+
+Code: convert a shapefile with ogr2ogr
+
+ogr2ogr -f GPKG parcels.gpkg parcels.shp -t_srs EPSG:25832 -nln parcels
+ogr2ogr -f DXF roads.dxf roads.gpkg -nln roads
+
+Code: read wall marks in pyRevit
+
+from Autodesk.Revit.DB import BuiltInCategory, FilteredElementCollector
+
+doc = __revit__.ActiveUIDocument.Document
+walls = FilteredElementCollector(doc).OfCategory(
+    BuiltInCategory.OST_Walls
+).WhereElementIsNotElementType()
+
+for wall in walls:
+    mark = wall.LookupParameter("Mark")
+    if mark is not None:
+        print(wall.Id, mark.AsString())
+
+AutoLISP
+
+The function setq assigns a value, and the function list builds a list. The function defun creates a command, and a command whose name starts with c: can be typed at the prompt. The function ssget builds a selection set, and the filter (cons 8 "ROADS") selects one layer. Read the command line prompts before you script a command, because every option changes the sequence of answers.
+
+A program ends with (princ), which prints nothing and returns quietly to the prompt. Check the parentheses before you load a program, because one missing parenthesis stops the whole file. The function setq assigns a value, and the function list builds a list.
+
+Data exchange
+
+A checksum of the source makes a repeatable conversion verifiable. Check the extent after a reprojection, because a wrong zone moves the whole dataset. An export that keeps object data is not the same as an export that keeps plain attributes, so say which one the receiver needs. A field name longer than ten characters is truncated by a shapefile, and the truncation can collide. Every format loses something, so decide what matters before you convert.
+
+A CSV file stores attributes without geometry, so a coordinate pair must be carried in two fields. A checksum of the source makes a repeatable conversion verifiable. A DXF file stores drawing geometry and layers, and it is the safest exchange format for AutoCAD.
+
+An export that keeps object data is not the same as an export that keeps plain attributes, so say which one the receiver needs. A DXF file with a different unit setting can arrive ten times too large or ten times too small. A field name longer than ten characters is truncated by a shapefile, and the truncation can collide. A GeoPackage stores many layers, long field names and spatial indexes in one file.
+
+PyQGIS and qgis_process
+
+The method addMapLayer adds a layer to the project, and the method removeMapLayer takes it away. A print layout is exported with the class QgsLayoutExporter, and the format is set on the export settings. The class QgsProject holds the open project, and the method mapLayers returns its layers. The processing module runs an algorithm with run, and the parameters are passed as a dictionary.
+
+A feedback object carries progress and cancellation, and a long job should check it. A memory layer keeps features in memory, which is useful for a result that does not need saving. The processing module runs an algorithm with run, and the parameters are passed as a dictionary. A vector layer is opened with QgsVectorLayer, and the second argument names the provider. A field that does not exist is created with a field definition and an edit buffer, and the change is committed after the loop.
+
+Coordinates and projections
+
+EPSG 4326 is WGS 84, and a coordinate in it is given in degrees. A false easting keeps coordinates positive, and a false northing does the same for the other axis. The zone number in a UTM system changes every six degrees of longitude.
+
+A projection always distorts something, so choose one that keeps the measurement you care about. The command ogr2ogr can reproject while it converts, with the option -t_srs. EPSG 3857 is WGS 84 / Pseudo-Mercator, and a coordinate in it is given in metres. Reprojection changes coordinates, not the shapes on the ground. Check the extent after a reprojection, because a wrong zone moves the whole dataset.
+
+AutoCAD Map 3D
+
+The command MAPCSASSIGN assigns a coordinate system to the drawing and warns when one is already assigned. Check the coordinate system before an export, because the export writes the coordinates it is given. Object data lives inside the drawing, and a feature data object connection lives outside it.
+
+The command MAPCSASSIGN assigns a coordinate system to the drawing and warns when one is already assigned. Do not mix drawing units, because a line drawn in millimetres will not line up with a parcel measured in metres. A coordinate system maps drawing coordinates to positions on the earth, and an EPSG code names that system.
+
+Do not mix drawing units, because a line drawn in millimetres will not line up with a parcel measured in metres. The command MAPCSASSIGN assigns a coordinate system to the drawing and warns when one is already assigned. The command MAPIMPORT brings a shapefile into the drawing, and the command MAPEXPORT writes drawing objects back out.
+
+Writing scripts
+
+Print what the program did, so the operator can see the result without opening the file. One recipe writes one artifact, so a failed run leaves one file to delete. The script prints a summary line with the counts of created, changed and skipped objects. The header of a script names the drawing, the date and the recipe that produced it. A generated program starts with its imports, reads the document, and changes it inside one transaction.
+
+A comment above a block explains why the block exists, not what each line does. A generated program starts with its imports, reads the document, and changes it inside one transaction. An error handler rolls the transaction back and prints the message, so a failure leaves no partial work. Keep the command line and the script in the same folder, so the two do not drift apart. Print what the program did, so the operator can see the result without opening the file.
+
+Quote every path and every layer name, because a space or a quote breaks an unquoted command. Write the output path into the script, and never overwrite the input file. An error handler rolls the transaction back and prints the message, so a failure leaves no partial work. A Python script for QGIS needs a QgsApplication when it runs outside the desktop.
+
+OCR and scanned drawings
+
+The OCR output is saved as text next to the image, so the next step does not repeat the work. A title block is the easiest text to read, because the letters are large and the contrast is high. The OCR pass reads the title block and returns the project name and the sheet number.
+
+A title block is the easiest text to read, because the letters are large and the contrast is high. Tesseract reads a clean scan well and a photograph badly, so deskew and threshold first. A rotated scan is deskewed before OCR, otherwise every line comes back as fragments.
+
+A confidence of ninety or more is usually correct, and a confidence of thirty is usually wrong. The OCR text is a hint for the operator, not a source of coordinates. Languages are named by their traineddata file, for example eng or deu.
+
+Glossary
+
+A polygon is a closed area bounded by one outer ring and any number of inner rings. A viewport is a window on a layout that shows model space. A topology is a set of rules about how features connect and share edges. A vertex is a point where two segments of a line meet.
+
+A bounding box is the smallest rectangle that contains a geometry. A spatial index is a lookup structure that makes a location query fast. A nodata value marks a cell with no measurement, and it is not the same as zero.
+
+A ring is a closed line that bounds a polygon. A centroid is the centre of mass of a geometry, and it can fall outside a concave polygon. A raster cell is one square of a grid, and its value is the measurement stored there.
+
+Revit and building data
+
+Read the model before you write to it, because a script that guesses will overwrite work. A level is a horizontal reference plane, and every wall is hosted by one. A workset splits a model so that several people can work in it at the same time. A transaction groups changes so that they are saved or undone together.
+
+A filter collects elements by category and parameter, and a collector without a filter returns the whole model. A type holds the dimensions, and an instance holds the position. The document class gives access to the model, and the active view is not always the view you want. A sheet is a printable page that holds views, and sheets export to PDF in a batch. A schedule reads parameters from elements and lists them in a table.
+
+A filter collects elements by category and parameter, and a collector without a filter returns the whole model. A transaction groups changes so that they are saved or undone together. Shared parameters travel between projects, and project parameters stay in one model.
+
+Troubleshooting
+
+If the result differs between runs, check the random seed and the tool version. If an export is empty, check the selection and the layer visibility. If a dialog appears in a script, the script is waiting for an answer that will never come.
+
+If a buffer looks wrong, check the units of the distance. If a command is unknown, check the application version, because commands move between releases. If the model is slow, check the number of open drawings and the size of the cache.
+
+Delivery notes
+
+A plot style is part of the deliverable, because a drawing that prints black is not the drawing you approved. A layer list is part of the deliverable, because the next person needs to know what each layer means. A PDF is for review, and the DWG is for editing, so send both when both are needed. Record the tool version in the note, because a result without a version cannot be repeated. Keep a copy of the inputs next to the outputs when the job is small.
+
+A plot style is part of the deliverable, because a drawing that prints black is not the drawing you approved. Record the tool version in the note, because a result without a version cannot be repeated. A drawing that has been audited, purged and saved is ready to send.
+
+A delivery note is short: what it is, what changed, what is missing. A PDF is for review, and the DWG is for editing, so send both when both are needed. A zip file with a flat folder is easier to open than a deep tree of folders.
+
+QGIS
+
+The field calculator evaluates an expression for every feature and writes the result into a field. A buffer builds a polygon at a fixed distance around each feature, and a negative distance shrinks it. A spatial join copies attributes from the layer you join onto the layer you join to. A QGIS project is saved as a QGZ file, and a GeoPackage stores many layers in one SQLite file. PyQGIS exposes layers, features, geometry and the processing registry to Python.
+
+A geometry check finds invalid polygons, and the fix geometry tool repairs them. A temporary scratch layer disappears when the project closes, so copy it before you close. QGIS is a free geographic information system that runs on Windows, macOS and Linux. The command qgis_process runs those algorithms without a window, which makes it usable from a script. The layer panel shows the drawing order, and the layer on top hides everything below it.
+
+Automation safety
+
+Back up the drawing before a batch, and keep the backup until the batch is checked. Log every change with the file, the recipe and the time, so a bad run can be traced. A script that deletes or overwrites needs a confirmation flag before it runs. Run the audit before and after, and compare the counts.
+
+Keep the working folder small, because a folder with ten thousand files slows every tool. Keep the source data read only, and write results into a new folder. Generate the script, read it, then run it, because a script repeats every mistake you make very fast.
+
+AutoCAD drawing basics
+
+Layer 0 is special: objects on layer 0 take the properties of the block that contains them. A drawing is the container for everything you draw in AutoCAD, and it is saved as a DWG file. A layout holds a title block and one or more viewports, and each viewport shows model space at a chosen scale.
+
+Layer 0 is special: objects on layer 0 take the properties of the block that contains them. Model space holds the geometry, and paper space holds the layouts that print it. A polyline is one object with many segments, and PLINE draws it segment by segment. A viewport can freeze a layer for one layout without freezing it in the model.
+
+A polyline is one object with many segments, and PLINE draws it segment by segment. A script with the SCR extension replays command line input, one line for every prompt. Layer 0 is special: objects on layer 0 take the properties of the block that contains them. The command ZOOM with the option Extents fits the drawing to the screen, which is useful after an import.
+
+Layers and scripts
+
+A layer with no objects is not free to keep if it also carries a plot style that nobody understands. The command -LAYER changes layer state from the command line, which is what a script needs. A script that creates layers twice fails on the second run unless it checks whether the layer exists. A layer filter groups layers by name, and a saved filter makes a large layer list usable.
+
+The layer PIPES is drawn in yellow so that the plot reads cleanly. The STREETLIGHTS layer and the DIMENSIONS layer stay separate, because one is existing and one is proposed. Freeze a layer when its objects should not be computed, and turn it off when they should only be hidden.
+
+Name layers in a fixed pattern so that a filter, a query or an export can find them later. The command -LAYER changes layer state from the command line, which is what a script needs. A layer with no objects is not free to keep if it also carries a plot style that nobody understands.
+
+Example sessions
+User: create levels at 0, 3.5, 7, 10.5
+amu: Recipe revit.create_levels matched. Wrote create_levels.py, which opens one transaction and creates four levels.
+User: describe site_plan.png
+amu: The image is 2400 by 1700 pixels, with 4.2 percent ink coverage and content that reaches the right edge.
+User: search the web for qgis native buffer
+amu: The search returned a QGIS documentation page, and the agent read the top result before answering.
+User: buffer roads by 25 metres and clip to parcels
+amu: Recipe qgis.buffer_clip matched. Wrote the PyQGIS script with a 25 metre buffer and a clip to the parcel layer.
+User: export attributes of blocks to csv
+amu: Recipe autocad.attributes_to_csv matched. Wrote att2csv.lsp, which writes one row per block reference.
+
+Code: create levels with a function in pyRevit
+
+from Autodesk.Revit.DB import Level, Transaction
+
+
+def create_levels(doc, elevations):
+    transaction = Transaction(doc, "Create levels")
+    transaction.Start()
+    try:
+        for elevation in elevations:
+            Level.Create(doc, elevation)
+        transaction.Commit()
+    except Exception:
+        transaction.RollBack()
+        raise
+
+
+doc = __revit__.ActiveUIDocument.Document
+create_levels(doc, [0.0, 3.5, 7.0, 10.5])
+
+Code: count objects on a layer in AutoLISP
+
+(defun c:TMK-COUNT ( / ss )
+  (setq ss (ssget "_X" '((8 . "ROADS"))))
+  (if ss
+    (princ (strcat "Selected " (itoa (sslength ss)) " objects."))
+    (princ "No objects found on ROADS.")
+  )
+  (princ)
+)
+
+AutoCAD Map 3D
+
+The command MAPCLEAN closes small gaps, removes duplicates and fixes overshoots. Map 3D keeps the original drawing objects, so an import can be reversed more easily than a conversion. Object data lives inside the drawing, and a feature data object connection lives outside it.
+
+The command MAPCLEAN closes small gaps, removes duplicates and fixes overshoots. Do not mix drawing units, because a line drawn in millimetres will not line up with a parcel measured in metres. A drawing that arrives without a coordinate system is a sketch, not a map.
+
+The command MAPCSASSIGN assigns a coordinate system to the drawing and warns when one is already assigned. The command MAPIMPORT brings a shapefile into the drawing, and the command MAPEXPORT writes drawing objects back out. A shapefile is a set of files, and the DBF file holds the attributes that the SHP file cannot.
+
+Data exchange
+
+A field name longer than ten characters is truncated by a shapefile, and the truncation can collide. A DXF file stores drawing geometry and layers, and it is the safest exchange format for AutoCAD. An export that keeps object data is not the same as an export that keeps plain attributes, so say which one the receiver needs.
+
+A field name longer than ten characters is truncated by a shapefile, and the truncation can collide. An export that keeps object data is not the same as an export that keeps plain attributes, so say which one the receiver needs. A coordinate pair in a CSV needs a declared order, because latitude first and longitude first look alike. A CSV file stores attributes without geometry, so a coordinate pair must be carried in two fields.
+
+Check the extent after a reprojection, because a wrong zone moves the whole dataset. A coordinate pair in a CSV needs a declared order, because latitude first and longitude first look alike. Every format loses something, so decide what matters before you convert.
+
+Delivery notes
+
+Record the tool version in the note, because a result without a version cannot be repeated. A plot style is part of the deliverable, because a drawing that prints black is not the drawing you approved. Keep a copy of the inputs next to the outputs when the job is small.
+
+Record the tool version in the note, because a result without a version cannot be repeated. Keep a copy of the inputs next to the outputs when the job is small. A plot style is part of the deliverable, because a drawing that prints black is not the drawing you approved.
+
+OCR and scanned drawings
+
+Upscale a small scan before OCR, because tesseract expects around three hundred dots per inch. The OCR pass reads the title block and returns the project name and the sheet number. Languages are named by their traineddata file, for example eng or deu. A page segmentation mode of six treats the page as one uniform block of text. Tesseract reads a clean scan well and a photograph badly, so deskew and threshold first.
+
+Languages are named by their traineddata file, for example eng or deu. The page segmentation mode tells tesseract how to divide the page into blocks. The OCR pass reads the title block and returns the project name and the sheet number. A rotated scan is deskewed before OCR, otherwise every line comes back as fragments.
+
+Automation safety
+
+Keep the working folder small, because a folder with ten thousand files slows every tool. A path from a request is data, not code, and it should be quoted as data. Pin the tool version, because an algorithm that changes behaviour changes your result.
+
+Generate the script, read it, then run it, because a script repeats every mistake you make very fast. Pin the tool version, because an algorithm that changes behaviour changes your result. A script that deletes or overwrites needs a confirmation flag before it runs.
+
+Coordinates and projections
+
+EPSG 25832 is ETRS89 / UTM zone 32N, and a coordinate in it is given in metres. A geographic coordinate system uses latitude and longitude, and a projected coordinate system uses metres on a flat surface. The zone number in a UTM system changes every six degrees of longitude.
+
+A coordinate without a system is a number without a meaning. A false easting keeps coordinates positive, and a false northing does the same for the other axis. A geographic coordinate system uses latitude and longitude, and a projected coordinate system uses metres on a flat surface. EPSG 32633 is WGS 84 / UTM zone 33N, and a coordinate in it is given in metres.
+
+PyQGIS and qgis_process
+
+The method commitChanges saves edits to the data source, and the method rollBack undoes them. The class QgsCoordinateTransform changes coordinates between two reference systems. The class QgsProject holds the open project, and the method mapLayers returns its layers. A script that runs inside QGIS has a running application, and a script that runs outside it must create one. An algorithm name looks like native:buffer, and the prefix names the provider that supplies it.
+
+The processing module runs an algorithm with run, and the parameters are passed as a dictionary. The method commitChanges saves edits to the data source, and the method rollBack undoes them. The method addMapLayer adds a layer to the project, and the method removeMapLayer takes it away. A feedback object carries progress and cancellation, and a long job should check it. A print layout is exported with the class QgsLayoutExporter, and the format is set on the export settings.
+
+Troubleshooting
+
+If the model is slow, check the number of open drawings and the size of the cache. If a buffer looks wrong, check the units of the distance. If a dialog appears in a script, the script is waiting for an answer that will never come. If features land in the wrong place, check the coordinate system before you move anything.
+
+If an export is empty, check the selection and the layer visibility. If the result differs between runs, check the random seed and the tool version. If a layer is missing, check that the name matches exactly, because a script does not guess.
+
+If a file is locked, check for a second application that still has it open. If a command is unknown, check the application version, because commands move between releases. If the result differs between runs, check the random seed and the tool version.
+
+Writing scripts
+
+Keep every function short, because a long function is hard to review before it runs. The header of a script names the drawing, the date and the recipe that produced it. A generated program starts with its imports, reads the document, and changes it inside one transaction.
+
+The script prints a summary line with the counts of created, changed and skipped objects. A script that runs twice should produce the same result, or it should refuse the second run. Keep the command line and the script in the same folder, so the two do not drift apart.
+
+One recipe writes one artifact, so a failed run leaves one file to delete. Keep the command line and the script in the same folder, so the two do not drift apart. A script that runs twice should produce the same result, or it should refuse the second run. A Python script for QGIS needs a QgsApplication when it runs outside the desktop. The header of a script names the drawing, the date and the recipe that produced it.
+
+QGIS
+
+The command qgis_process runs those algorithms without a window, which makes it usable from a script. A print layout holds a map, a legend, a scale bar and a title, and it exports to PDF. The field calculator evaluates an expression for every feature and writes the result into a field.
+
+PyQGIS exposes layers, features, geometry and the processing registry to Python. A spatial join copies attributes from the layer you join onto the layer you join to. The processing toolbox runs buffer, clip, dissolve, intersection and spatial join.
+
+AutoLISP
+
+The function defun creates a command, and a command whose name starts with c: can be typed at the prompt. A LISP file that is loaded with APPLOAD stays in memory until the drawing closes. A command that begins with c: runs like a built-in command, and a function without c: must be called from another program.
+
+The function setq assigns a value, and the function list builds a list. Read the command line prompts before you script a command, because every option changes the sequence of answers. The function command calls an AutoCAD command, and it expects the same answers that you would type. An entity name is valid until the entity is deleted, so finish reading it before you erase it. The function ssget builds a selection set, and the filter (cons 8 "ROADS") selects one layer.
+
+Layers and scripts
+
+Colour, linetype and lineweight belong to the layer, not to the object, when objects use BYLAYER. The TEXT layer and the SEWER layer stay separate, because one is existing and one is proposed. Create the STREETLIGHTS layer before drawing, so that every object lands in the right place.
+
+The command -PURGE with the option All removes the unused layers that a script leaves behind. The command -LAYER changes layer state from the command line, which is what a script needs. The layer SEWER is drawn in blue so that the plot reads cleanly. The command LAYERP opens the layer properties manager, and -LAYER works without a dialog. A layer with no objects is not free to keep if it also carries a plot style that nobody understands.
+
+AutoCAD drawing basics
+
+A viewport can freeze a layer for one layout without freezing it in the model. A layout holds a title block and one or more viewports, and each viewport shows model space at a chosen scale. The command AUDIT checks a drawing for errors, and the command PURGE removes unused blocks, layers and linetypes. Model space holds the geometry, and paper space holds the layouts that print it.
+
+An xref links another drawing into the current drawing instead of copying its objects. A drawing is the container for everything you draw in AutoCAD, and it is saved as a DWG file. A block is a reusable group of objects, and one edit to the block updates every insertion. A layout holds a title block and one or more viewports, and each viewport shows model space at a chosen scale. A script with the SCR extension replays command line input, one line for every prompt.
+
+Revit and building data
+
+A type holds the dimensions, and an instance holds the position. Revit stores a building model in an RVT file and organises it by categories, families and types. A schedule reads parameters from elements and lists them in a table.
+
+A level is a horizontal reference plane, and every wall is hosted by one. The Revit API is reached with Python through pyRevit, and every change must be inside a transaction. A family is a parametric component, and a family instance is one placement of it. A sheet is a printable page that holds views, and sheets export to PDF in a batch. Revit stores a building model in an RVT file and organises it by categories, families and types.
+
+Glossary
+
+A tolerance is the distance below which two points are treated as one. A topology is a set of rules about how features connect and share edges. A segment is the straight piece between two vertices. A feature is one row of geometry and attributes in a vector layer.
+
+A tolerance is the distance below which two points are treated as one. A polygon is a closed area bounded by one outer ring and any number of inner rings. A nodata value marks a cell with no measurement, and it is not the same as zero. A bounding box is the smallest rectangle that contains a geometry.
+
+A tolerance is the distance below which two points are treated as one. A bounding box is the smallest rectangle that contains a geometry. An overlay combines two layers and keeps the parts that intersect. A vertex is a point where two segments of a line meet. A raster cell is one square of a grid, and its value is the measurement stored there.
+
+Example sessions
+User: buffer roads by 25 metres and clip to parcels
+amu: Recipe qgis.buffer_clip matched. Wrote the PyQGIS script with a 25 metre buffer and a clip to the parcel layer.
+User: reproject parcels.shp to EPSG:25832
+amu: Recipe qgis.reproject matched. Wrote reproject.py and the qgis_process command with -t_srs EPSG:25832.
+User: export attributes of blocks to csv
+amu: Recipe autocad.attributes_to_csv matched. Wrote att2csv.lsp, which writes one row per block reference.
+User: audit and purge this drawing
+amu: Recipe autocad.audit_purge matched. Wrote audit_purge.scr, and the note says to run it on a copy first.
+User: create layers roads, parcels, contours in red
+amu: Recipe autocad.create_layers matched. Wrote layers.scr with three -LAYER calls and a layer list note.
+
+Code: buffer and clip in PyQGIS
+
+from qgis.core import QgsProject, QgsVectorLayer
+import processing
+
+roads = QgsVectorLayer("roads.shp", "roads", "ogr")
+parcels = QgsVectorLayer("parcels.shp", "parcels", "ogr")
+
+buffered = processing.run("native:buffer", {
+    "INPUT": roads,
+    "DISTANCE": 25.0,
+    "SEGMENTS": 8,
+    "END_CAP_STYLE": 0,
+    "JOIN_STYLE": 0,
+    "DISSOLVE": False,
+    "OUTPUT": "memory:buffer",
+})["OUTPUT"]
+
+clipped = processing.run("native:clip", {
+    "INPUT": buffered,
+    "OVERLAY": parcels,
+    "OUTPUT": "buffer_clip.gpkg",
+})["OUTPUT"]
+
+QgsProject.instance().addMapLayer(clipped)
+
+Code: report layers with a function in PyQGIS
+
+from qgis.core import QgsProject
+
+
+def layer_report(project):
+    for layer in project.mapLayers().values():
+        print(layer.name(), layer.featureCount())
+
+
+layer_report(QgsProject.instance())
+
+Coordinates and projections
+
+A PRJ file stores the coordinate system of a shapefile, and a missing PRJ means an unknown system. A datum shift can move features by metres, so never assume that two systems agree. EPSG 2154 is RGF93 / Lambert-93, and a coordinate in it is given in metres. A coordinate without a system is a number without a meaning.
+
+Web Mercator is convenient for tiled maps and wrong for area measurements. A false easting keeps coordinates positive, and a false northing does the same for the other axis. A projection always distorts something, so choose one that keeps the measurement you care about. A coordinate without a system is a number without a meaning. A geographic coordinate system uses latitude and longitude, and a projected coordinate system uses metres on a flat surface.
+
+The command ogr2ogr can reproject while it converts, with the option -t_srs. Reprojection changes coordinates, not the shapes on the ground. The zone number in a UTM system changes every six degrees of longitude. A geographic coordinate system uses latitude and longitude, and a projected coordinate system uses metres on a flat surface. EPSG 28992 is Amersfoort / RD New, and a coordinate in it is given in metres.
+
+AutoCAD Map 3D
+
+AutoCAD Map 3D adds geographic data to AutoCAD, and the drawing stays the centre of the work. A shapefile is a set of files, and the DBF file holds the attributes that the SHP file cannot. The command MAPCSASSIGN assigns a coordinate system to the drawing and warns when one is already assigned.
+
+A shapefile is a set of files, and the DBF file holds the attributes that the SHP file cannot. A drawing that arrives without a coordinate system is a sketch, not a map. The command MAPCSASSIGN assigns a coordinate system to the drawing and warns when one is already assigned.
+
+Delivery notes
+
+Keep a copy of the inputs next to the outputs when the job is small. A layer list is part of the deliverable, because the next person needs to know what each layer means. A drawing that has been audited, purged and saved is ready to send.
+
+Keep a copy of the inputs next to the outputs when the job is small. A PDF is for review, and the DWG is for editing, so send both when both are needed. A layer list is part of the deliverable, because the next person needs to know what each layer means. Record the coordinate system in the note, because a later reader cannot recover it from the geometry alone. A drawing that has been audited, purged and saved is ready to send.
+
+Layers and scripts
+
+A script that creates layers twice fails on the second run unless it checks whether the layer exists. The ROADS layer and the GRID layer stay separate, because the plot style treats them differently. The command -PURGE with the option All removes the unused layers that a script leaves behind. A layer with no objects is not free to keep if it also carries a plot style that nobody understands. A script sets the current layer, draws, and restores the previous layer before it ends.
+
+A script sets the current layer, draws, and restores the previous layer before it ends. Create the SITE layer before drawing, so that every object lands in the right place. The STREETLIGHTS layer and the PARCELS layer stay separate, because the plot style treats them differently. The command LAYERP opens the layer properties manager, and -LAYER works without a dialog.
+
+AutoLISP
+
+Wrap file paths with the function findfile, because a path with spaces or a backslash is easy to break. AutoLISP is the scripting language built into AutoCAD, and a program is stored in a LSP file. A command that begins with c: runs like a built-in command, and a function without c: must be called from another program.
+
+A program ends with (princ), which prints nothing and returns quietly to the prompt. A selection set can be iterated with ssname and sslength, and a loop over it edits one entity at a time. Check the parentheses before you load a program, because one missing parenthesis stops the whole file.
+
+OCR and scanned drawings
+
+The OCR output is saved as text next to the image, so the next step does not repeat the work. The page segmentation mode tells tesseract how to divide the page into blocks. The OCR pass reads the title block and returns the project name and the sheet number. OCR returns text, not geometry: a detected label still needs a check against the drawing.
+
+The OCR output is saved as text next to the image, so the next step does not repeat the work. If OCR finds nothing, check that the image is not blank and that the text is not lighter than the background. Languages are named by their traineddata file, for example eng or deu. Handwriting is not what tesseract is built for, and the confidence shows it.
+
+OCR returns text, not geometry: a detected label still needs a check against the drawing. The OCR pass reads the title block and returns the project name and the sheet number. The OCR output is saved as text next to the image, so the next step does not repeat the work.
+
+PyQGIS and qgis_process
+
+The distance parameter of a buffer is in the units of the layer, not in the units of the project. A feature is read with getFeatures, and each feature carries a geometry and a set of attributes. The method commitChanges saves edits to the data source, and the method rollBack undoes them. A field that does not exist is created with a field definition and an edit buffer, and the change is committed after the loop. The class QgsProject holds the open project, and the method mapLayers returns its layers.
+
+The class QgsProject holds the open project, and the method mapLayers returns its layers. The method addMapLayer adds a layer to the project, and the method removeMapLayer takes it away. A feedback object carries progress and cancellation, and a long job should check it. The distance parameter of a buffer is in the units of the layer, not in the units of the project. The method commitChanges saves edits to the data source, and the method rollBack undoes them.
+
+Writing scripts
+
+Keep the command line and the script in the same folder, so the two do not drift apart. Keep every function short, because a long function is hard to review before it runs. Test the program on a copy of the drawing, then read its output before running it on the real model. The header of a script names the drawing, the date and the recipe that produced it.
+
+One recipe writes one artifact, so a failed run leaves one file to delete. A Python script for QGIS needs a QgsApplication when it runs outside the desktop. The script prints a summary line with the counts of created, changed and skipped objects. Print what the program did, so the operator can see the result without opening the file.
+
+Data exchange
+
+A DXF file stores drawing geometry and layers, and it is the safest exchange format for AutoCAD. Keep the source file read only, and write every result into a new folder. A coordinate pair in a CSV needs a declared order, because latitude first and longitude first look alike. Every format loses something, so decide what matters before you convert.
+
+A coordinate pair in a CSV needs a declared order, because latitude first and longitude first look alike. A DXF file with a different unit setting can arrive ten times too large or ten times too small. A GeoPackage stores many layers, long field names and spatial indexes in one file.
+
+A date field is text in a shapefile and a real date in a GeoPackage, so check it after a conversion. An export that keeps object data is not the same as an export that keeps plain attributes, so say which one the receiver needs. A coordinate pair in a CSV needs a declared order, because latitude first and longitude first look alike. A checksum of the source makes a repeatable conversion verifiable.
+
+Revit and building data
+
+A sheet is a printable page that holds views, and sheets export to PDF in a batch. Revit stores a building model in an RVT file and organises it by categories, families and types. A warning in Revit is not an error, but a batch of warnings usually hides one. A filter collects elements by category and parameter, and a collector without a filter returns the whole model.
+
+Purge unused families before delivery, because an RVT file carries everything it ever held. A filter collects elements by category and parameter, and a collector without a filter returns the whole model. A transaction groups changes so that they are saved or undone together. A type holds the dimensions, and an instance holds the position.
+
+Automation safety
+
+Pin the tool version, because an algorithm that changes behaviour changes your result. Generate the script, read it, then run it, because a script repeats every mistake you make very fast. A path from a request is data, not code, and it should be quoted as data. Never build a command by joining strings from a request, because a stray quote changes the command.
+
+A script that deletes or overwrites needs a confirmation flag before it runs. Run the audit before and after, and compare the counts. A dry run prints the steps without touching data, and it costs seconds. Pin the tool version, because an algorithm that changes behaviour changes your result. An allowlist of binaries is safer than a blocklist, because a blocklist always misses one.
+
+An allowlist of binaries is safer than a blocklist, because a blocklist always misses one. Back up the drawing before a batch, and keep the backup until the batch is checked. Keep the working folder small, because a folder with ten thousand files slows every tool. A script that deletes or overwrites needs a confirmation flag before it runs. A path from a request is data, not code, and it should be quoted as data.
+
+QGIS
+
+The command qgis_process runs those algorithms without a window, which makes it usable from a script. QGIS is a free geographic information system that runs on Windows, macOS and Linux. PyQGIS exposes layers, features, geometry and the processing registry to Python.
+
+The field calculator evaluates an expression for every feature and writes the result into a field. A spatial join copies attributes from the layer you join onto the layer you join to. Reproject a layer when its coordinate reference system does not match the project. The command qgis_process runs those algorithms without a window, which makes it usable from a script. A buffer builds a polygon at a fixed distance around each feature, and a negative distance shrinks it.
+
+A spatial join copies attributes from the layer you join onto the layer you join to. A geometry check finds invalid polygons, and the fix geometry tool repairs them. A print layout holds a map, a legend, a scale bar and a title, and it exports to PDF. Save the style with the layer, because a colour ramp lost on reload is work you repeat. The command qgis_process runs those algorithms without a window, which makes it usable from a script.
+
+AutoCAD drawing basics
+
+The command ZOOM with the option Extents fits the drawing to the screen, which is useful after an import. A template drawing with the right layers and styles removes that work from every new drawing. A layout holds a title block and one or more viewports, and each viewport shows model space at a chosen scale. A polyline is one object with many segments, and PLINE draws it segment by segment. A viewport can freeze a layer for one layout without freezing it in the model.
+
+A polyline is one object with many segments, and PLINE draws it segment by segment. A script with the SCR extension replays command line input, one line for every prompt. Model space holds the geometry, and paper space holds the layouts that print it. Layer 0 is special: objects on layer 0 take the properties of the block that contains them.
+
+Troubleshooting
+
+If a polygon has a hole, check the ring order and the closing point. If a join returns nothing, check the field type, because text and numbers do not match. If a PDF is blank, check the plot window and the page setup. If a file is locked, check for a second application that still has it open.
+
+If the result differs between runs, check the random seed and the tool version. If a file is locked, check for a second application that still has it open. If a polygon has a hole, check the ring order and the closing point.
+
+Glossary
+
+A polygon is a closed area bounded by one outer ring and any number of inner rings. A viewport is a window on a layout that shows model space. A bounding box is the smallest rectangle that contains a geometry. A feature is one row of geometry and attributes in a vector layer.
+
+A tolerance is the distance below which two points are treated as one. A polygon is a closed area bounded by one outer ring and any number of inner rings. A multipolygon holds several polygons that belong to one feature. An overlay combines two layers and keeps the parts that intersect. A segment is the straight piece between two vertices.
+
+An attribute is a value attached to a feature, and a field is the column that holds it. A vertex is a point where two segments of a line meet. A raster cell is one square of a grid, and its value is the measurement stored there.
+
+Example sessions
+User: describe site_plan.png
+amu: The image is 2400 by 1700 pixels, with 4.2 percent ink coverage and content that reaches the right edge.
+User: create levels at 0, 3.5, 7, 10.5
+amu: Recipe revit.create_levels matched. Wrote create_levels.py, which opens one transaction and creates four levels.
+User: create layers roads, parcels, contours in red
+amu: Recipe autocad.create_layers matched. Wrote layers.scr with three -LAYER calls and a layer list note.
+User: audit and purge this drawing
+amu: Recipe autocad.audit_purge matched. Wrote audit_purge.scr, and the note says to run it on a copy first.
+User: search the web for qgis native buffer
+amu: The search returned a QGIS documentation page, and the agent read the top result before answering.
+
+Code: reproject with qgis_process
+
+qgis_process run native:reprojectlayer --INPUT=parcels.shp --TARGET_CRS=EPSG:25832 --OUTPUT=parcels_25832.gpkg
+
+Code: create layers in a script file
+
+-LAYER
+New
+ROADS,PARCELS,CONTOURS
+
+-COLOR
+RED
+ROADS
+
+ZOOM
+Extents
+AUDIT
+Y
+-PURGE
+All
+
+AutoCAD Map 3D
+
+A topology records how lines connect and where polygons share a boundary. Object data lives inside the drawing, and a feature data object connection lives outside it. A drawing that arrives without a coordinate system is a sketch, not a map. AutoCAD Map 3D adds geographic data to AutoCAD, and the drawing stays the centre of the work.
+
+EPSG 3857 is WGS 84 / Pseudo-Mercator, measured in metres, and it is used in web maps. A coordinate system maps drawing coordinates to positions on the earth, and an EPSG code names that system. Check the coordinate system before an export, because the export writes the coordinates it is given.
+
+EPSG 32633 is WGS 84 / UTM zone 33N, measured in metres, and it is used in the eastern hemisphere. The command MAPCSASSIGN assigns a coordinate system to the drawing and warns when one is already assigned. Map 3D keeps the original drawing objects, so an import can be reversed more easily than a conversion.
+
+Coordinates and projections
+
+A datum shift can move features by metres, so never assume that two systems agree. EPSG 25832 is ETRS89 / UTM zone 32N, and a coordinate in it is given in metres. The command ogr2ogr can reproject while it converts, with the option -t_srs.
+
+A false easting keeps coordinates positive, and a false northing does the same for the other axis. Store coordinates in the system you will analyse in, and reproject at the edge of the work. Web Mercator is convenient for tiled maps and wrong for area measurements. Reprojection changes coordinates, not the shapes on the ground.
+
+AutoLISP
+
+Check the parentheses before you load a program, because one missing parenthesis stops the whole file. A LISP file that is loaded with APPLOAD stays in memory until the drawing closes. A command that begins with c: runs like a built-in command, and a function without c: must be called from another program. A program ends with (princ), which prints nothing and returns quietly to the prompt. The function defun creates a command, and a command whose name starts with c: can be typed at the prompt.
+
+AutoLISP is the scripting language built into AutoCAD, and a program is stored in a LSP file. Strings in AutoLISP are escaped so that a quote, a backslash or a newline cannot break the program. The function defun creates a command, and a command whose name starts with c: can be typed at the prompt. Check the parentheses before you load a program, because one missing parenthesis stops the whole file. The function ssget builds a selection set, and the filter (cons 8 "ROADS") selects one layer.
+
+AutoLISP is the scripting language built into AutoCAD, and a program is stored in a LSP file. The function defun creates a command, and a command whose name starts with c: can be typed at the prompt. A LISP file that is loaded with APPLOAD stays in memory until the drawing closes. A selection set can be iterated with ssname and sslength, and a loop over it edits one entity at a time.
+
+Delivery notes
+
+Record the coordinate system in the note, because a later reader cannot recover it from the geometry alone. A delivery note is short: what it is, what changed, what is missing. Record the tool version in the note, because a result without a version cannot be repeated. Deliver the drawing, the source data, the script and a short note that says what changed.
+
+Record the coordinate system in the note, because a later reader cannot recover it from the geometry alone. A drawing that has been audited, purged and saved is ready to send. Keep a copy of the inputs next to the outputs when the job is small. Deliver the drawing, the source data, the script and a short note that says what changed.
+
+Record the coordinate system in the note, because a later reader cannot recover it from the geometry alone. A PDF is for review, and the DWG is for editing, so send both when both are needed. Keep a copy of the inputs next to the outputs when the job is small.
+
+Automation safety
+
+Log every change with the file, the recipe and the time, so a bad run can be traced. Test a script on a copy of the drawing, never on the only copy. Pin the tool version, because an algorithm that changes behaviour changes your result. A path from a request is data, not code, and it should be quoted as data. A dry run prints the steps without touching data, and it costs seconds.
+
+Never build a command by joining strings from a request, because a stray quote changes the command. Keep the working folder small, because a folder with ten thousand files slows every tool. A path from a request is data, not code, and it should be quoted as data.
+
+QGIS
+
+The OGR provider reads a shapefile, and the same provider writes a GeoPackage layer. The field calculator evaluates an expression for every feature and writes the result into a field. A geometry check finds invalid polygons, and the fix geometry tool repairs them. The command qgis_process runs those algorithms without a window, which makes it usable from a script.
+
+A spatial join copies attributes from the layer you join onto the layer you join to. The command qgis_process runs those algorithms without a window, which makes it usable from a script. A QGIS project is saved as a QGZ file, and a GeoPackage stores many layers in one SQLite file. The layer panel shows the drawing order, and the layer on top hides everything below it. A geometry check finds invalid polygons, and the fix geometry tool repairs them.
+
+The processing toolbox runs buffer, clip, dissolve, intersection and spatial join. A spatial join copies attributes from the layer you join onto the layer you join to. The OGR provider reads a shapefile, and the same provider writes a GeoPackage layer.
+
+Revit and building data
+
+A warning in Revit is not an error, but a batch of warnings usually hides one. A sheet is a printable page that holds views, and sheets export to PDF in a batch. Shared parameters travel between projects, and project parameters stay in one model. A level is a horizontal reference plane, and every wall is hosted by one.
+
+A transaction groups changes so that they are saved or undone together. A type holds the dimensions, and an instance holds the position. A sheet is a printable page that holds views, and sheets export to PDF in a batch. The Revit API is reached with Python through pyRevit, and every change must be inside a transaction. A level is a horizontal reference plane, and every wall is hosted by one.
+
+A level is a horizontal reference plane, and every wall is hosted by one. A sheet is a printable page that holds views, and sheets export to PDF in a batch. An element id is stable inside one model, and it is not a reliable key between models. A filter collects elements by category and parameter, and a collector without a filter returns the whole model.
+
+Writing scripts
+
+Quote every path and every layer name, because a space or a quote breaks an unquoted command. Keep every function short, because a long function is hard to review before it runs. An error handler rolls the transaction back and prints the message, so a failure leaves no partial work.
+
+Keep every function short, because a long function is hard to review before it runs. The script prints a summary line with the counts of created, changed and skipped objects. An error handler rolls the transaction back and prints the message, so a failure leaves no partial work. A Python script for QGIS needs a QgsApplication when it runs outside the desktop. One recipe writes one artifact, so a failed run leaves one file to delete.
+
+The header of a script names the drawing, the date and the recipe that produced it. One recipe writes one artifact, so a failed run leaves one file to delete. An error handler rolls the transaction back and prints the message, so a failure leaves no partial work. A generated program starts with its imports, reads the document, and changes it inside one transaction.
+
+OCR and scanned drawings
+
+If OCR finds nothing, check that the image is not blank and that the text is not lighter than the background. A confidence below sixty usually means the scan is rotated, noisy or too small. Upscale a small scan before OCR, because tesseract expects around three hundred dots per inch. The OCR pass reads the title block and returns the project name and the sheet number.
+
+OCR returns text, not geometry: a detected label still needs a check against the drawing. The OCR pass reads the title block and returns the project name and the sheet number. Tesseract reads a clean scan well and a photograph badly, so deskew and threshold first.
+
+A table comes back as loose words, so the columns have to be rebuilt from their coordinates. OCR returns text, not geometry: a detected label still needs a check against the drawing. A confidence of ninety or more is usually correct, and a confidence of thirty is usually wrong.
+
+Data exchange
+
+A DXF file with a different unit setting can arrive ten times too large or ten times too small. A CSV file stores attributes without geometry, so a coordinate pair must be carried in two fields. Run a count before and after a conversion, and compare the totals. A date field is text in a shapefile and a real date in a GeoPackage, so check it after a conversion. A DXF file stores drawing geometry and layers, and it is the safest exchange format for AutoCAD.
+
+An export that keeps object data is not the same as an export that keeps plain attributes, so say which one the receiver needs. A SHP file stores geometry and attributes, and it loses styling, labels and relationships. Run a count before and after a conversion, and compare the totals. A date field is text in a shapefile and a real date in a GeoPackage, so check it after a conversion.
+
+A checksum of the source makes a repeatable conversion verifiable. A GeoPackage stores many layers, long field names and spatial indexes in one file. Run a count before and after a conversion, and compare the totals. Check the extent after a reprojection, because a wrong zone moves the whole dataset. A coordinate pair in a CSV needs a declared order, because latitude first and longitude first look alike.
+
+Layers and scripts
+
+The command -PURGE with the option All removes the unused layers that a script leaves behind. Freeze a layer when its objects should not be computed, and turn it off when they should only be hidden. Create the SITE layer before drawing, so that every object lands in the right place. The ROADS layer and the BUILDINGS layer stay separate, because they print at different scales.
+
+The command -LAYER changes layer state from the command line, which is what a script needs. The SEWER layer and the DIMENSIONS layer stay separate, because they belong to different trades. The layer PIPES is drawn in red so that the plot reads cleanly. The command LAYERP opens the layer properties manager, and -LAYER works without a dialog.
+
+AutoCAD drawing basics
+
+Model space holds the geometry, and paper space holds the layouts that print it. A block is a reusable group of objects, and one edit to the block updates every insertion. The command AUDIT checks a drawing for errors, and the command PURGE removes unused blocks, layers and linetypes.
+
+A drawing that mixes metres and millimetres will not measure correctly, so agree on units first. A script with the SCR extension replays command line input, one line for every prompt. The command AUDIT checks a drawing for errors, and the command PURGE removes unused blocks, layers and linetypes.
+
+Glossary
+
+A polygon is a closed area bounded by one outer ring and any number of inner rings. A bounding box is the smallest rectangle that contains a geometry. A ring is a closed line that bounds a polygon.
+
+A multipolygon holds several polygons that belong to one feature. A sliver is a long thin polygon created by an imperfect overlay. A vertex is a point where two segments of a line meet. An overlay combines two layers and keeps the parts that intersect.
+
+A vertex is a point where two segments of a line meet. A feature is one row of geometry and attributes in a vector layer. A dissolve merges features that share a value into one feature. A segment is the straight piece between two vertices.
+
+PyQGIS and qgis_process
+
+A feedback object carries progress and cancellation, and a long job should check it. The class QgsProject holds the open project, and the method mapLayers returns its layers. The distance parameter of a buffer is in the units of the layer, not in the units of the project.
+
+An algorithm name looks like native:buffer, and the prefix names the provider that supplies it. The class QgsCoordinateTransform changes coordinates between two reference systems. A memory layer keeps features in memory, which is useful for a result that does not need saving.
+
+An algorithm name looks like native:buffer, and the prefix names the provider that supplies it. The method commitChanges saves edits to the data source, and the method rollBack undoes them. A feature is read with getFeatures, and each feature carries a geometry and a set of attributes.
+
+Troubleshooting
+
+If the result differs between runs, check the random seed and the tool version. If a script stops halfway, run it line by line and find the first prompt that differs. If a shapefile will not open, check that the SHX and DBF files sit next to the SHP file. If an export is empty, check the selection and the layer visibility.
+
+If a layer is missing, check that the name matches exactly, because a script does not guess. If a command is unknown, check the application version, because commands move between releases. If a dialog appears in a script, the script is waiting for an answer that will never come. If a join returns nothing, check the field type, because text and numbers do not match.
+
+Example sessions
+User: create levels at 0, 3.5, 7, 10.5
+amu: Recipe revit.create_levels matched. Wrote create_levels.py, which opens one transaction and creates four levels.
+User: what can you do
+amu: amu writes scripts for Revit, AutoCAD, AutoCAD Map 3D and QGIS, reads web pages, and measures images.
+User: create layers roads, parcels, contours in red
+amu: Recipe autocad.create_layers matched. Wrote layers.scr with three -LAYER calls and a layer list note.
+User: audit and purge this drawing
+amu: Recipe autocad.audit_purge matched. Wrote audit_purge.scr, and the note says to run it on a copy first.
+User: buffer roads by 25 metres and clip to parcels
+amu: Recipe qgis.buffer_clip matched. Wrote the PyQGIS script with a 25 metre buffer and a clip to the parcel layer.
+
+Code: list layers in a GeoPackage
+
+from osgeo import ogr
+
+source = ogr.Open("site.gpkg")
+for index in range(source.GetLayerCount()):
+    layer = source.GetLayerByIndex(index)
+    print(layer.GetName(), layer.GetFeatureCount())
+
+Code: create layers in a script file
+
+-LAYER
+New
+ROADS,PARCELS,CONTOURS
+
+-COLOR
+RED
+ROADS
+
+ZOOM
+Extents
+AUDIT
+Y
+-PURGE
+All
+
+QGIS
+
+A print layout holds a map, a legend, a scale bar and a title, and it exports to PDF. A spatial join copies attributes from the layer you join onto the layer you join to. Reproject a layer when its coordinate reference system does not match the project.
+
+The command qgis_process runs those algorithms without a window, which makes it usable from a script. A spatial join copies attributes from the layer you join onto the layer you join to. A QGIS project is saved as a QGZ file, and a GeoPackage stores many layers in one SQLite file. PyQGIS exposes layers, features, geometry and the processing registry to Python.
+
+The OGR provider reads a shapefile, and the same provider writes a GeoPackage layer. Save the style with the layer, because a colour ramp lost on reload is work you repeat. Reproject a layer when its coordinate reference system does not match the project.
+
+Data exchange
+
+A GeoPackage stores many layers, long field names and spatial indexes in one file. An export that keeps object data is not the same as an export that keeps plain attributes, so say which one the receiver needs. Check the extent after a reprojection, because a wrong zone moves the whole dataset. A DXF file stores drawing geometry and layers, and it is the safest exchange format for AutoCAD.
+
+A date field is text in a shapefile and a real date in a GeoPackage, so check it after a conversion. Every format loses something, so decide what matters before you convert. A SHP file stores geometry and attributes, and it loses styling, labels and relationships.
+
+A DXF file stores drawing geometry and layers, and it is the safest exchange format for AutoCAD. Check the extent after a reprojection, because a wrong zone moves the whole dataset. A date field is text in a shapefile and a real date in a GeoPackage, so check it after a conversion.
+
+Glossary
+
+A nodata value marks a cell with no measurement, and it is not the same as zero. A dissolve merges features that share a value into one feature. A raster cell is one square of a grid, and its value is the measurement stored there.
+
+A tolerance is the distance below which two points are treated as one. A dissolve merges features that share a value into one feature. A centroid is the centre of mass of a geometry, and it can fall outside a concave polygon. A vertex is a point where two segments of a line meet.
+
+A tolerance is the distance below which two points are treated as one. A dissolve merges features that share a value into one feature. An overlay combines two layers and keeps the parts that intersect. A raster cell is one square of a grid, and its value is the measurement stored there.
+
+Coordinates and projections
+
+The zone number in a UTM system changes every six degrees of longitude. A false easting keeps coordinates positive, and a false northing does the same for the other axis. Web Mercator is convenient for tiled maps and wrong for area measurements.
+
+A coordinate without a system is a number without a meaning. The command ogr2ogr can reproject while it converts, with the option -t_srs. Store coordinates in the system you will analyse in, and reproject at the edge of the work. Web Mercator is convenient for tiled maps and wrong for area measurements. Reprojection changes coordinates, not the shapes on the ground.
+
+Delivery notes
+
+A delivery note is short: what it is, what changed, what is missing. Keep a copy of the inputs next to the outputs when the job is small. Deliver the drawing, the source data, the script and a short note that says what changed. Record the tool version in the note, because a result without a version cannot be repeated.
+
+A layer list is part of the deliverable, because the next person needs to know what each layer means. A delivery note is short: what it is, what changed, what is missing. Remove the temporary files before you zip, and check the archive by opening it.
+
+Layers and scripts
+
+The command LAYERP opens the layer properties manager, and -LAYER works without a dialog. Freeze a layer when its objects should not be computed, and turn it off when they should only be hidden. The SITE layer and the ROADS layer stay separate, because a query should be able to select one of them. A script sets the current layer, draws, and restores the previous layer before it ends. A layer filter groups layers by name, and a saved filter makes a large layer list usable.
+
+A layer filter groups layers by name, and a saved filter makes a large layer list usable. A layer with no objects is not free to keep if it also carries a plot style that nobody understands. A script that creates layers twice fails on the second run unless it checks whether the layer exists. A script sets the current layer, draws, and restores the previous layer before it ends. Freeze a layer when its objects should not be computed, and turn it off when they should only be hidden.
+
+Troubleshooting
+
+If a PDF is blank, check the plot window and the page setup. If a shapefile will not open, check that the SHX and DBF files sit next to the SHP file. If a script stops halfway, run it line by line and find the first prompt that differs. If an export is empty, check the selection and the layer visibility. If a polygon has a hole, check the ring order and the closing point.
+
+If features land in the wrong place, check the coordinate system before you move anything. If a buffer looks wrong, check the units of the distance. If a file is locked, check for a second application that still has it open.
+
+Revit and building data
+
+An element id is stable inside one model, and it is not a reliable key between models. The document class gives access to the model, and the active view is not always the view you want. Read the model before you write to it, because a script that guesses will overwrite work. A sheet is a printable page that holds views, and sheets export to PDF in a batch. A type holds the dimensions, and an instance holds the position.
+
+A family is a parametric component, and a family instance is one placement of it. A workset splits a model so that several people can work in it at the same time. A filter collects elements by category and parameter, and a collector without a filter returns the whole model. A level is a horizontal reference plane, and every wall is hosted by one. Shared parameters travel between projects, and project parameters stay in one model.
+
+The document class gives access to the model, and the active view is not always the view you want. A warning in Revit is not an error, but a batch of warnings usually hides one. A workset splits a model so that several people can work in it at the same time.
+
+AutoCAD drawing basics
+
+An xref links another drawing into the current drawing instead of copying its objects. The command ZOOM with the option Extents fits the drawing to the screen, which is useful after an import. A viewport can freeze a layer for one layout without freezing it in the model. A block is a reusable group of objects, and one edit to the block updates every insertion.
+
+A script with the SCR extension replays command line input, one line for every prompt. Model space holds the geometry, and paper space holds the layouts that print it. Layer 0 is special: objects on layer 0 take the properties of the block that contains them. The command ZOOM with the option Extents fits the drawing to the screen, which is useful after an import.
+
+AutoLISP
+
+The function defun creates a command, and a command whose name starts with c: can be typed at the prompt. Check the parentheses before you load a program, because one missing parenthesis stops the whole file. Strings in AutoLISP are escaped so that a quote, a backslash or a newline cannot break the program. The function ssget builds a selection set, and the filter (cons 8 "ROADS") selects one layer.
+
+Check the parentheses before you load a program, because one missing parenthesis stops the whole file. The function ssget builds a selection set, and the filter (cons 8 "ROADS") selects one layer. The function setq assigns a value, and the function list builds a list. The function defun creates a command, and a command whose name starts with c: can be typed at the prompt.
+
+Writing scripts
+
+One recipe writes one artifact, so a failed run leaves one file to delete. The script prints a summary line with the counts of created, changed and skipped objects. Test the program on a copy of the drawing, then read its output before running it on the real model.
+
+A script that runs twice should produce the same result, or it should refuse the second run. Quote every path and every layer name, because a space or a quote breaks an unquoted command. A generated program starts with its imports, reads the document, and changes it inside one transaction. The script prints a summary line with the counts of created, changed and skipped objects.
+
+A comment above a block explains why the block exists, not what each line does. Test the program on a copy of the drawing, then read its output before running it on the real model. Print what the program did, so the operator can see the result without opening the file. Keep every function short, because a long function is hard to review before it runs. An error handler rolls the transaction back and prints the message, so a failure leaves no partial work.
+
+Automation safety
+
+Never build a command by joining strings from a request, because a stray quote changes the command. A confirmation prompt is not a security boundary when the same flag can be passed by a script. An allowlist of binaries is safer than a blocklist, because a blocklist always misses one. Run the audit before and after, and compare the counts. A path from a request is data, not code, and it should be quoted as data.
+
+Test a script on a copy of the drawing, never on the only copy. Log every change with the file, the recipe and the time, so a bad run can be traced. Keep the source data read only, and write results into a new folder.
+
+AutoCAD Map 3D
+
+Do not mix drawing units, because a line drawn in millimetres will not line up with a parcel measured in metres. The command MAPCLEAN closes small gaps, removes duplicates and fixes overshoots. The command MAPCSASSIGN assigns a coordinate system to the drawing and warns when one is already assigned.
+
+The command MAPCSASSIGN assigns a coordinate system to the drawing and warns when one is already assigned. A drawing that arrives without a coordinate system is a sketch, not a map. Map 3D keeps the original drawing objects, so an import can be reversed more easily than a conversion. A shapefile is a set of files, and the DBF file holds the attributes that the SHP file cannot. The command MAPIMPORT brings a shapefile into the drawing, and the command MAPEXPORT writes drawing objects back out.
+
+PyQGIS and qgis_process
+
+A feature is read with getFeatures, and each feature carries a geometry and a set of attributes. The distance parameter of a buffer is in the units of the layer, not in the units of the project. The class QgsCoordinateTransform changes coordinates between two reference systems. The processing module runs an algorithm with run, and the parameters are passed as a dictionary.
+
+The processing module runs an algorithm with run, and the parameters are passed as a dictionary. A print layout is exported with the class QgsLayoutExporter, and the format is set on the export settings. The distance parameter of a buffer is in the units of the layer, not in the units of the project. The method commitChanges saves edits to the data source, and the method rollBack undoes them.
+
+OCR and scanned drawings
+
+The OCR text is a hint for the operator, not a source of coordinates. Handwriting is not what tesseract is built for, and the confidence shows it. The OCR output is saved as text next to the image, so the next step does not repeat the work. The page segmentation mode tells tesseract how to divide the page into blocks.
+
+A confidence of ninety or more is usually correct, and a confidence of thirty is usually wrong. The OCR pass reads the title block and returns the project name and the sheet number. Upscale a small scan before OCR, because tesseract expects around three hundred dots per inch. A table comes back as loose words, so the columns have to be rebuilt from their coordinates. Handwriting is not what tesseract is built for, and the confidence shows it.
+
+A table comes back as loose words, so the columns have to be rebuilt from their coordinates. The OCR output is saved as text next to the image, so the next step does not repeat the work. Languages are named by their traineddata file, for example eng or deu. A confidence of ninety or more is usually correct, and a confidence of thirty is usually wrong. A page segmentation mode of six treats the page as one uniform block of text.
+
+Example sessions
+User: create layers roads, parcels, contours in red
+amu: Recipe autocad.create_layers matched. Wrote layers.scr with three -LAYER calls and a layer list note.
+User: buffer roads by 25 metres and clip to parcels
+amu: Recipe qgis.buffer_clip matched. Wrote the PyQGIS script with a 25 metre buffer and a clip to the parcel layer.
+User: export attributes of blocks to csv
+amu: Recipe autocad.attributes_to_csv matched. Wrote att2csv.lsp, which writes one row per block reference.
+User: create levels at 0, 3.5, 7, 10.5
+amu: Recipe revit.create_levels matched. Wrote create_levels.py, which opens one transaction and creates four levels.
+User: reproject parcels.shp to EPSG:25832
+amu: Recipe qgis.reproject matched. Wrote reproject.py and the qgis_process command with -t_srs EPSG:25832.
+
+Code: count objects on a layer in AutoLISP
+
+(defun c:TMK-COUNT ( / ss )
+  (setq ss (ssget "_X" '((8 . "ROADS"))))
+  (if ss
+    (princ (strcat "Selected " (itoa (sslength ss)) " objects."))
+    (princ "No objects found on ROADS.")
+  )
+  (princ)
+)
+
+Code: read wall marks in pyRevit
+
+from Autodesk.Revit.DB import BuiltInCategory, FilteredElementCollector
+
+doc = __revit__.ActiveUIDocument.Document
+walls = FilteredElementCollector(doc).OfCategory(
+    BuiltInCategory.OST_Walls
+).WhereElementIsNotElementType()
+
+for wall in walls:
+    mark = wall.LookupParameter("Mark")
+    if mark is not None:
+        print(wall.Id, mark.AsString())
+
+QGIS
+
+A QGIS project is saved as a QGZ file, and a GeoPackage stores many layers in one SQLite file. The processing toolbox runs buffer, clip, dissolve, intersection and spatial join. A buffer builds a polygon at a fixed distance around each feature, and a negative distance shrinks it. The layer panel shows the drawing order, and the layer on top hides everything below it.
+
+A temporary scratch layer disappears when the project closes, so copy it before you close. A buffer builds a polygon at a fixed distance around each feature, and a negative distance shrinks it. QGIS is a free geographic information system that runs on Windows, macOS and Linux. Save the style with the layer, because a colour ramp lost on reload is work you repeat. The command qgis_process runs those algorithms without a window, which makes it usable from a script.
+
+A QGIS project is saved as a QGZ file, and a GeoPackage stores many layers in one SQLite file. PyQGIS exposes layers, features, geometry and the processing registry to Python. A print layout holds a map, a legend, a scale bar and a title, and it exports to PDF. The OGR provider reads a shapefile, and the same provider writes a GeoPackage layer. The layer panel shows the drawing order, and the layer on top hides everything below it.
+
+PyQGIS and qgis_process
+
+A feature is read with getFeatures, and each feature carries a geometry and a set of attributes. The class QgsProject holds the open project, and the method mapLayers returns its layers. A memory layer keeps features in memory, which is useful for a result that does not need saving. The distance parameter of a buffer is in the units of the layer, not in the units of the project.
+
+The method commitChanges saves edits to the data source, and the method rollBack undoes them. The processing module runs an algorithm with run, and the parameters are passed as a dictionary. A print layout is exported with the class QgsLayoutExporter, and the format is set on the export settings.
+
+Writing scripts
+
+The header of a script names the drawing, the date and the recipe that produced it. Quote every path and every layer name, because a space or a quote breaks an unquoted command. A comment above a block explains why the block exists, not what each line does. Test the program on a copy of the drawing, then read its output before running it on the real model. Write the output path into the script, and never overwrite the input file.
+
+Keep every function short, because a long function is hard to review before it runs. The header of a script names the drawing, the date and the recipe that produced it. Print what the program did, so the operator can see the result without opening the file. Write the output path into the script, and never overwrite the input file. Quote every path and every layer name, because a space or a quote breaks an unquoted command.
+
+Test the program on a copy of the drawing, then read its output before running it on the real model. The header of a script names the drawing, the date and the recipe that produced it. Write the output path into the script, and never overwrite the input file. A comment above a block explains why the block exists, not what each line does.
+
+Glossary
+
+A topology is a set of rules about how features connect and share edges. A ring is a closed line that bounds a polygon. A tolerance is the distance below which two points are treated as one. A multipolygon holds several polygons that belong to one feature. A dissolve merges features that share a value into one feature.
+
+A dissolve merges features that share a value into one feature. A segment is the straight piece between two vertices. A topology is a set of rules about how features connect and share edges. A tolerance is the distance below which two points are treated as one. A polygon is a closed area bounded by one outer ring and any number of inner rings.
+
+AutoLISP
+
+The function setq assigns a value, and the function list builds a list. The function command calls an AutoCAD command, and it expects the same answers that you would type. An entity name is valid until the entity is deleted, so finish reading it before you erase it.
+
+An entity name is valid until the entity is deleted, so finish reading it before you erase it. A selection set can be iterated with ssname and sslength, and a loop over it edits one entity at a time. The function defun creates a command, and a command whose name starts with c: can be typed at the prompt. The function ssget builds a selection set, and the filter (cons 8 "ROADS") selects one layer. The function setq assigns a value, and the function list builds a list.
+
+Read the command line prompts before you script a command, because every option changes the sequence of answers. The function command calls an AutoCAD command, and it expects the same answers that you would type. An entity name is valid until the entity is deleted, so finish reading it before you erase it.
+
+Delivery notes
+
+Deliver the drawing, the source data, the script and a short note that says what changed. Record the coordinate system in the note, because a later reader cannot recover it from the geometry alone. Keep a copy of the inputs next to the outputs when the job is small. A delivery note is short: what it is, what changed, what is missing.
+
+A drawing that has been audited, purged and saved is ready to send. Name the output with the date and the recipe, so a later run does not overwrite an earlier one. A delivery note is short: what it is, what changed, what is missing. A zip file with a flat folder is easier to open than a deep tree of folders.
+
+Keep a copy of the inputs next to the outputs when the job is small. Record the tool version in the note, because a result without a version cannot be repeated. A layer list is part of the deliverable, because the next person needs to know what each layer means.
+
+Revit and building data
+
+Purge unused families before delivery, because an RVT file carries everything it ever held. A warning in Revit is not an error, but a batch of warnings usually hides one. A workset splits a model so that several people can work in it at the same time. An element id is stable inside one model, and it is not a reliable key between models. A type holds the dimensions, and an instance holds the position.
+
+A filter collects elements by category and parameter, and a collector without a filter returns the whole model. Purge unused families before delivery, because an RVT file carries everything it ever held. A schedule reads parameters from elements and lists them in a table. A type holds the dimensions, and an instance holds the position.
+
+A family is a parametric component, and a family instance is one placement of it. Shared parameters travel between projects, and project parameters stay in one model. A type holds the dimensions, and an instance holds the position. A workset splits a model so that several people can work in it at the same time. An element id is stable inside one model, and it is not a reliable key between models.
+
+Automation safety
+
+Test a script on a copy of the drawing, never on the only copy. Log every change with the file, the recipe and the time, so a bad run can be traced. An allowlist of binaries is safer than a blocklist, because a blocklist always misses one.
+
+Test a script on a copy of the drawing, never on the only copy. Never build a command by joining strings from a request, because a stray quote changes the command. An allowlist of binaries is safer than a blocklist, because a blocklist always misses one. Log every change with the file, the recipe and the time, so a bad run can be traced.
+
+Coordinates and projections
+
+A false easting keeps coordinates positive, and a false northing does the same for the other axis. The command ogr2ogr can reproject while it converts, with the option -t_srs. Check the extent after a reprojection, because a wrong zone moves the whole dataset.
+
+The zone number in a UTM system changes every six degrees of longitude. Web Mercator is convenient for tiled maps and wrong for area measurements. EPSG 27700 is OSGB36 / British National Grid, and a coordinate in it is given in metres. Reprojection changes coordinates, not the shapes on the ground.
+
+AutoCAD drawing basics
+
+The command AUDIT checks a drawing for errors, and the command PURGE removes unused blocks, layers and linetypes. The command UNITS sets the units of the drawing, and the command INSUNITS records them for other applications. A script with the SCR extension replays command line input, one line for every prompt. An object has a colour, a layer, a linetype and a lineweight, and each of them can be set directly or by layer. A template drawing with the right layers and styles removes that work from every new drawing.
+
+A script with the SCR extension replays command line input, one line for every prompt. A block is a reusable group of objects, and one edit to the block updates every insertion. An xref links another drawing into the current drawing instead of copying its objects.
+
+A script with the SCR extension replays command line input, one line for every prompt. A viewport can freeze a layer for one layout without freezing it in the model. A layout holds a title block and one or more viewports, and each viewport shows model space at a chosen scale.
+
+AutoCAD Map 3D
+
+A topology records how lines connect and where polygons share a boundary. Map 3D keeps the original drawing objects, so an import can be reversed more easily than a conversion. The command MAPCSASSIGN assigns a coordinate system to the drawing and warns when one is already assigned. The command ADEQUERY filters drawing objects before an export, so a large drawing can be split by attribute.
+
+A coordinate system maps drawing coordinates to positions on the earth, and an EPSG code names that system. Object data lives inside the drawing, and a feature data object connection lives outside it. The command MAPCSASSIGN assigns a coordinate system to the drawing and warns when one is already assigned. The command MAPIMPORT brings a shapefile into the drawing, and the command MAPEXPORT writes drawing objects back out. The command ADEQUERY filters drawing objects before an export, so a large drawing can be split by attribute.
+
+Data exchange
+
+A field name longer than ten characters is truncated by a shapefile, and the truncation can collide. A DXF file with a different unit setting can arrive ten times too large or ten times too small. A CSV file stores attributes without geometry, so a coordinate pair must be carried in two fields.
+
+Keep the source file read only, and write every result into a new folder. A field name longer than ten characters is truncated by a shapefile, and the truncation can collide. A coordinate pair in a CSV needs a declared order, because latitude first and longitude first look alike.
+
+OCR and scanned drawings
+
+The OCR output is saved as text next to the image, so the next step does not repeat the work. Tesseract reads a clean scan well and a photograph badly, so deskew and threshold first. A rotated scan is deskewed before OCR, otherwise every line comes back as fragments. Handwriting is not what tesseract is built for, and the confidence shows it. A title block is the easiest text to read, because the letters are large and the contrast is high.
+
+The OCR text is a hint for the operator, not a source of coordinates. A rotated scan is deskewed before OCR, otherwise every line comes back as fragments. Tesseract reads a clean scan well and a photograph badly, so deskew and threshold first. A page segmentation mode of six treats the page as one uniform block of text. The OCR output is saved as text next to the image, so the next step does not repeat the work.
+
+A confidence below sixty usually means the scan is rotated, noisy or too small. Languages are named by their traineddata file, for example eng or deu. The OCR output is saved as text next to the image, so the next step does not repeat the work.
+
+Layers and scripts
+
+A script sets the current layer, draws, and restores the previous layer before it ends. Colour, linetype and lineweight belong to the layer, not to the object, when objects use BYLAYER. The command LAYERP opens the layer properties manager, and -LAYER works without a dialog. Freeze a layer when its objects should not be computed, and turn it off when they should only be hidden. A layer with no objects is not free to keep if it also carries a plot style that nobody understands.
+
+The layer BUILDINGS is drawn in blue so that the plot reads cleanly. The command LAYERP opens the layer properties manager, and -LAYER works without a dialog. The SEWER layer and the SITE layer stay separate, because one is existing and one is proposed. Freeze a layer when its objects should not be computed, and turn it off when they should only be hidden.
+
+Freeze a layer when its objects should not be computed, and turn it off when they should only be hidden. Create the TREES layer before drawing, so that every object lands in the right place. The BUILDINGS layer and the SEWER layer stay separate, because they belong to different trades. A script sets the current layer, draws, and restores the previous layer before it ends. Lock a layer when you want to see it but not edit it, because a locked object cannot be selected for editing.
+
+Troubleshooting
+
+If a layer is missing, check that the name matches exactly, because a script does not guess. If a join returns nothing, check the field type, because text and numbers do not match. If a shapefile will not open, check that the SHX and DBF files sit next to the SHP file.
+
+If a command is unknown, check the application version, because commands move between releases. If a PDF is blank, check the plot window and the page setup. If an export is empty, check the selection and the layer visibility.
+
+If a buffer looks wrong, check the units of the distance. If an export is empty, check the selection and the layer visibility. If a dialog appears in a script, the script is waiting for an answer that will never come. If the model is slow, check the number of open drawings and the size of the cache. If a script stops halfway, run it line by line and find the first prompt that differs.
+
+Example sessions
+User: import shapefile into autocad map 3d
+amu: Recipe map3d.import_shapefile matched. Wrote the ogr2ogr conversion and the MAPCSASSIGN and MAPIMPORT steps.
+User: create layers roads, parcels, contours in red
+amu: Recipe autocad.create_layers matched. Wrote layers.scr with three -LAYER calls and a layer list note.
+User: describe site_plan.png
+amu: The image is 2400 by 1700 pixels, with 4.2 percent ink coverage and content that reaches the right edge.
+User: audit and purge this drawing
+amu: Recipe autocad.audit_purge matched. Wrote audit_purge.scr, and the note says to run it on a copy first.
+User: reproject parcels.shp to EPSG:25832
+amu: Recipe qgis.reproject matched. Wrote reproject.py and the qgis_process command with -t_srs EPSG:25832.
+
+Code: report layers with a function in PyQGIS
+
+from qgis.core import QgsProject
+
+
+def layer_report(project):
+    for layer in project.mapLayers().values():
+        print(layer.name(), layer.featureCount())
+
+
+layer_report(QgsProject.instance())
+
+Code: buffer and clip in PyQGIS
+
+from qgis.core import QgsProject, QgsVectorLayer
+import processing
+
+roads = QgsVectorLayer("roads.shp", "roads", "ogr")
+parcels = QgsVectorLayer("parcels.shp", "parcels", "ogr")
+
+buffered = processing.run("native:buffer", {
+    "INPUT": roads,
+    "DISTANCE": 25.0,
+    "SEGMENTS": 8,
+    "END_CAP_STYLE": 0,
+    "JOIN_STYLE": 0,
+    "DISSOLVE": False,
+    "OUTPUT": "memory:buffer",
+})["OUTPUT"]
+
+clipped = processing.run("native:clip", {
+    "INPUT": buffered,
+    "OVERLAY": parcels,
+    "OUTPUT": "buffer_clip.gpkg",
+})["OUTPUT"]
+
+QgsProject.instance().addMapLayer(clipped)
+
+Data exchange
+
+An export that keeps object data is not the same as an export that keeps plain attributes, so say which one the receiver needs. Check the extent after a reprojection, because a wrong zone moves the whole dataset. A field name longer than ten characters is truncated by a shapefile, and the truncation can collide. Keep the source file read only, and write every result into a new folder.
+
+A date field is text in a shapefile and a real date in a GeoPackage, so check it after a conversion. A coordinate pair in a CSV needs a declared order, because latitude first and longitude first look alike. Every format loses something, so decide what matters before you convert. A GeoPackage stores many layers, long field names and spatial indexes in one file.
+
+Check the extent after a reprojection, because a wrong zone moves the whole dataset. A date field is text in a shapefile and a real date in a GeoPackage, so check it after a conversion. A checksum of the source makes a repeatable conversion verifiable. A field name longer than ten characters is truncated by a shapefile, and the truncation can collide. A SHP file stores geometry and attributes, and it loses styling, labels and relationships.
+
+QGIS
+
+The field calculator evaluates an expression for every feature and writes the result into a field. A spatial join copies attributes from the layer you join onto the layer you join to. The processing toolbox runs buffer, clip, dissolve, intersection and spatial join.
+
+The OGR provider reads a shapefile, and the same provider writes a GeoPackage layer. A QGIS project is saved as a QGZ file, and a GeoPackage stores many layers in one SQLite file. A print layout holds a map, a legend, a scale bar and a title, and it exports to PDF. The layer panel shows the drawing order, and the layer on top hides everything below it. A geometry check finds invalid polygons, and the fix geometry tool repairs them.
+
+The OGR provider reads a shapefile, and the same provider writes a GeoPackage layer. A spatial join copies attributes from the layer you join onto the layer you join to. Reproject a layer when its coordinate reference system does not match the project. The layer panel shows the drawing order, and the layer on top hides everything below it. A temporary scratch layer disappears when the project closes, so copy it before you close.
+
+AutoCAD drawing basics
+
+The command AUDIT checks a drawing for errors, and the command PURGE removes unused blocks, layers and linetypes. A layout holds a title block and one or more viewports, and each viewport shows model space at a chosen scale. The command UNITS sets the units of the drawing, and the command INSUNITS records them for other applications. A polyline is one object with many segments, and PLINE draws it segment by segment. An object has a colour, a layer, a linetype and a lineweight, and each of them can be set directly or by layer.
+
+An xref links another drawing into the current drawing instead of copying its objects. A script with the SCR extension replays command line input, one line for every prompt. The command ZOOM with the option Extents fits the drawing to the screen, which is useful after an import. A viewport can freeze a layer for one layout without freezing it in the model.
+
+Glossary
+
+A segment is the straight piece between two vertices. A sliver is a long thin polygon created by an imperfect overlay. A polygon is a closed area bounded by one outer ring and any number of inner rings. A spatial index is a lookup structure that makes a location query fast.
+
+A bounding box is the smallest rectangle that contains a geometry. A raster cell is one square of a grid, and its value is the measurement stored there. A viewport is a window on a layout that shows model space. A nodata value marks a cell with no measurement, and it is not the same as zero.
+
+A tolerance is the distance below which two points are treated as one. A nodata value marks a cell with no measurement, and it is not the same as zero. A spatial index is a lookup structure that makes a location query fast.
+
+Automation safety
+
+Test a script on a copy of the drawing, never on the only copy. Keep the source data read only, and write results into a new folder. An allowlist of binaries is safer than a blocklist, because a blocklist always misses one.
+
+A confirmation prompt is not a security boundary when the same flag can be passed by a script. Log every change with the file, the recipe and the time, so a bad run can be traced. Test a script on a copy of the drawing, never on the only copy. An allowlist of binaries is safer than a blocklist, because a blocklist always misses one.
+
+Troubleshooting
+
+If a shapefile will not open, check that the SHX and DBF files sit next to the SHP file. If a file is locked, check for a second application that still has it open. If a command is unknown, check the application version, because commands move between releases.
+
+If a dialog appears in a script, the script is waiting for an answer that will never come. If a layer is missing, check that the name matches exactly, because a script does not guess. If features land in the wrong place, check the coordinate system before you move anything.
+
+Coordinates and projections
+
+The zone number in a UTM system changes every six degrees of longitude. A transformation between two datums can need a grid file, and without it the result is only approximate. A PRJ file stores the coordinate system of a shapefile, and a missing PRJ means an unknown system.
+
+A transformation between two datums can need a grid file, and without it the result is only approximate. A false easting keeps coordinates positive, and a false northing does the same for the other axis. EPSG 4326 is WGS 84, and a coordinate in it is given in degrees.
+
+The zone number in a UTM system changes every six degrees of longitude. A transformation between two datums can need a grid file, and without it the result is only approximate. Check the extent after a reprojection, because a wrong zone moves the whole dataset. The command ogr2ogr can reproject while it converts, with the option -t_srs. A PRJ file stores the coordinate system of a shapefile, and a missing PRJ means an unknown system.
+
+Delivery notes
+
+A plot style is part of the deliverable, because a drawing that prints black is not the drawing you approved. Remove the temporary files before you zip, and check the archive by opening it. A layer list is part of the deliverable, because the next person needs to know what each layer means. A delivery note is short: what it is, what changed, what is missing.
+
+A zip file with a flat folder is easier to open than a deep tree of folders. Keep a copy of the inputs next to the outputs when the job is small. Remove the temporary files before you zip, and check the archive by opening it.
+
+Revit and building data
+
+A filter collects elements by category and parameter, and a collector without a filter returns the whole model. A transaction groups changes so that they are saved or undone together. The Revit API is reached with Python through pyRevit, and every change must be inside a transaction. A warning in Revit is not an error, but a batch of warnings usually hides one. Shared parameters travel between projects, and project parameters stay in one model.
+
+Purge unused families before delivery, because an RVT file carries everything it ever held. A family is a parametric component, and a family instance is one placement of it. A workset splits a model so that several people can work in it at the same time. Revit stores a building model in an RVT file and organises it by categories, families and types.
+
+Layers and scripts
+
+A script sets the current layer, draws, and restores the previous layer before it ends. A layer filter groups layers by name, and a saved filter makes a large layer list usable. Create the GRID layer before drawing, so that every object lands in the right place. A script that creates layers twice fails on the second run unless it checks whether the layer exists. The SITE layer and the WATER layer stay separate, because one is existing and one is proposed.
+
+A layer filter groups layers by name, and a saved filter makes a large layer list usable. Freeze a layer when its objects should not be computed, and turn it off when they should only be hidden. A script sets the current layer, draws, and restores the previous layer before it ends.
+
+A layer with no objects is not free to keep if it also carries a plot style that nobody understands. A script sets the current layer, draws, and restores the previous layer before it ends. A script that creates layers twice fails on the second run unless it checks whether the layer exists. The command LAYERP opens the layer properties manager, and -LAYER works without a dialog.
+
+AutoCAD Map 3D
+
+A shapefile is a set of files, and the DBF file holds the attributes that the SHP file cannot. Check the coordinate system before an export, because the export writes the coordinates it is given. A topology records how lines connect and where polygons share a boundary. A coordinate system maps drawing coordinates to positions on the earth, and an EPSG code names that system. The command MAPCLEAN closes small gaps, removes duplicates and fixes overshoots.
+
+A coordinate system maps drawing coordinates to positions on the earth, and an EPSG code names that system. Object data lives inside the drawing, and a feature data object connection lives outside it. The command MAPCSASSIGN assigns a coordinate system to the drawing and warns when one is already assigned.
+
+Writing scripts
+
+A script that runs twice should produce the same result, or it should refuse the second run. A Python script for QGIS needs a QgsApplication when it runs outside the desktop. Write the output path into the script, and never overwrite the input file.
+
+A Python script for QGIS needs a QgsApplication when it runs outside the desktop. Quote every path and every layer name, because a space or a quote breaks an unquoted command. Write the output path into the script, and never overwrite the input file. A script that runs twice should produce the same result, or it should refuse the second run.
+
+OCR and scanned drawings
+
+A page segmentation mode of six treats the page as one uniform block of text. The OCR output is saved as text next to the image, so the next step does not repeat the work. Handwriting is not what tesseract is built for, and the confidence shows it. OCR returns text, not geometry: a detected label still needs a check against the drawing. If OCR finds nothing, check that the image is not blank and that the text is not lighter than the background.
+
+Upscale a small scan before OCR, because tesseract expects around three hundred dots per inch. The OCR output is saved as text next to the image, so the next step does not repeat the work. A title block is the easiest text to read, because the letters are large and the contrast is high. If OCR finds nothing, check that the image is not blank and that the text is not lighter than the background.
+
+A table comes back as loose words, so the columns have to be rebuilt from their coordinates. The page segmentation mode tells tesseract how to divide the page into blocks. The OCR text is a hint for the operator, not a source of coordinates. Handwriting is not what tesseract is built for, and the confidence shows it. The OCR output is saved as text next to the image, so the next step does not repeat the work.
+
+PyQGIS and qgis_process
+
+A vector layer is opened with QgsVectorLayer, and the second argument names the provider. The method addMapLayer adds a layer to the project, and the method removeMapLayer takes it away. The processing module runs an algorithm with run, and the parameters are passed as a dictionary.
+
+A memory layer keeps features in memory, which is useful for a result that does not need saving. The distance parameter of a buffer is in the units of the layer, not in the units of the project. A field that does not exist is created with a field definition and an edit buffer, and the change is committed after the loop. The method addMapLayer adds a layer to the project, and the method removeMapLayer takes it away. The class QgsProject holds the open project, and the method mapLayers returns its layers.
+
+A print layout is exported with the class QgsLayoutExporter, and the format is set on the export settings. An algorithm name looks like native:buffer, and the prefix names the provider that supplies it. The class QgsProject holds the open project, and the method mapLayers returns its layers.
+
+AutoLISP
+
+Read the command line prompts before you script a command, because every option changes the sequence of answers. Wrap file paths with the function findfile, because a path with spaces or a backslash is easy to break. A program ends with (princ), which prints nothing and returns quietly to the prompt.
+
+A LISP file that is loaded with APPLOAD stays in memory until the drawing closes. Wrap file paths with the function findfile, because a path with spaces or a backslash is easy to break. An entity name is valid until the entity is deleted, so finish reading it before you erase it. Check the parentheses before you load a program, because one missing parenthesis stops the whole file. Strings in AutoLISP are escaped so that a quote, a backslash or a newline cannot break the program.
+
+The function command calls an AutoCAD command, and it expects the same answers that you would type. Check the parentheses before you load a program, because one missing parenthesis stops the whole file. Read the command line prompts before you script a command, because every option changes the sequence of answers. The function defun creates a command, and a command whose name starts with c: can be typed at the prompt.
+
+Example sessions
+User: audit and purge this drawing
+amu: Recipe autocad.audit_purge matched. Wrote audit_purge.scr, and the note says to run it on a copy first.
+User: create layers roads, parcels, contours in red
+amu: Recipe autocad.create_layers matched. Wrote layers.scr with three -LAYER calls and a layer list note.
+User: reproject parcels.shp to EPSG:25832
+amu: Recipe qgis.reproject matched. Wrote reproject.py and the qgis_process command with -t_srs EPSG:25832.
+User: import shapefile into autocad map 3d
+amu: Recipe map3d.import_shapefile matched. Wrote the ogr2ogr conversion and the MAPCSASSIGN and MAPIMPORT steps.
+User: export attributes of blocks to csv
+amu: Recipe autocad.attributes_to_csv matched. Wrote att2csv.lsp, which writes one row per block reference.
+
+Code: list layers in a GeoPackage
+
+from osgeo import ogr
+
+source = ogr.Open("site.gpkg")
+for index in range(source.GetLayerCount()):
+    layer = source.GetLayerByIndex(index)
+    print(layer.GetName(), layer.GetFeatureCount())
+
+Code: convert a shapefile with ogr2ogr
+
+ogr2ogr -f GPKG parcels.gpkg parcels.shp -t_srs EPSG:25832 -nln parcels
+ogr2ogr -f DXF roads.dxf roads.gpkg -nln roads
+
+Troubleshooting
+
+If a buffer looks wrong, check the units of the distance. If a join returns nothing, check the field type, because text and numbers do not match. If the model is slow, check the number of open drawings and the size of the cache. If a polygon has a hole, check the ring order and the closing point. If a command is unknown, check the application version, because commands move between releases.
+
+If a shapefile will not open, check that the SHX and DBF files sit next to the SHP file. If a polygon has a hole, check the ring order and the closing point. If a script stops halfway, run it line by line and find the first prompt that differs.
+
+If a file is locked, check for a second application that still has it open. If a layer is missing, check that the name matches exactly, because a script does not guess. If a polygon has a hole, check the ring order and the closing point. If a shapefile will not open, check that the SHX and DBF files sit next to the SHP file.
+
+AutoCAD drawing basics
+
+A drawing is the container for everything you draw in AutoCAD, and it is saved as a DWG file. Layer 0 is special: objects on layer 0 take the properties of the block that contains them. The command UNITS sets the units of the drawing, and the command INSUNITS records them for other applications. A script with the SCR extension replays command line input, one line for every prompt. An object has a colour, a layer, a linetype and a lineweight, and each of them can be set directly or by layer.
+
+A viewport can freeze a layer for one layout without freezing it in the model. A polyline is one object with many segments, and PLINE draws it segment by segment. The command AUDIT checks a drawing for errors, and the command PURGE removes unused blocks, layers and linetypes. A block is a reusable group of objects, and one edit to the block updates every insertion.
+
+A polyline is one object with many segments, and PLINE draws it segment by segment. The command AUDIT checks a drawing for errors, and the command PURGE removes unused blocks, layers and linetypes. Layer 0 is special: objects on layer 0 take the properties of the block that contains them. A block is a reusable group of objects, and one edit to the block updates every insertion. A drawing is the container for everything you draw in AutoCAD, and it is saved as a DWG file.
+
+Glossary
+
+A sliver is a long thin polygon created by an imperfect overlay. An overlay combines two layers and keeps the parts that intersect. A ring is a closed line that bounds a polygon. A polygon is a closed area bounded by one outer ring and any number of inner rings. An attribute is a value attached to a feature, and a field is the column that holds it.
+
+A topology is a set of rules about how features connect and share edges. A viewport is a window on a layout that shows model space. A centroid is the centre of mass of a geometry, and it can fall outside a concave polygon.
+
+An attribute is a value attached to a feature, and a field is the column that holds it. A topology is a set of rules about how features connect and share edges. A spatial index is a lookup structure that makes a location query fast. A centroid is the centre of mass of a geometry, and it can fall outside a concave polygon.
+
+Writing scripts
+
+The script prints a summary line with the counts of created, changed and skipped objects. Write the output path into the script, and never overwrite the input file. An error handler rolls the transaction back and prints the message, so a failure leaves no partial work. Test the program on a copy of the drawing, then read its output before running it on the real model.
+
+One recipe writes one artifact, so a failed run leaves one file to delete. A Python script for QGIS needs a QgsApplication when it runs outside the desktop. A comment above a block explains why the block exists, not what each line does.
+
+AutoLISP
+
+AutoLISP is the scripting language built into AutoCAD, and a program is stored in a LSP file. The function ssget builds a selection set, and the filter (cons 8 "ROADS") selects one layer. A selection set can be iterated with ssname and sslength, and a loop over it edits one entity at a time.
+
+Strings in AutoLISP are escaped so that a quote, a backslash or a newline cannot break the program. Check the parentheses before you load a program, because one missing parenthesis stops the whole file. A program ends with (princ), which prints nothing and returns quietly to the prompt. The function command calls an AutoCAD command, and it expects the same answers that you would type.
+
+Delivery notes
+
+Deliver the drawing, the source data, the script and a short note that says what changed. A zip file with a flat folder is easier to open than a deep tree of folders. Keep a copy of the inputs next to the outputs when the job is small. Remove the temporary files before you zip, and check the archive by opening it. Record the tool version in the note, because a result without a version cannot be repeated.
+
+Name the output with the date and the recipe, so a later run does not overwrite an earlier one. A drawing that has been audited, purged and saved is ready to send. A zip file with a flat folder is easier to open than a deep tree of folders.
+
+OCR and scanned drawings
+
+A table comes back as loose words, so the columns have to be rebuilt from their coordinates. If OCR finds nothing, check that the image is not blank and that the text is not lighter than the background. The OCR pass reads the title block and returns the project name and the sheet number. The OCR output is saved as text next to the image, so the next step does not repeat the work.
+
+A table comes back as loose words, so the columns have to be rebuilt from their coordinates. A page segmentation mode of six treats the page as one uniform block of text. A rotated scan is deskewed before OCR, otherwise every line comes back as fragments.
+
+Data exchange
+
+An export that keeps object data is not the same as an export that keeps plain attributes, so say which one the receiver needs. A date field is text in a shapefile and a real date in a GeoPackage, so check it after a conversion. A CSV file stores attributes without geometry, so a coordinate pair must be carried in two fields. Check the extent after a reprojection, because a wrong zone moves the whole dataset.
+
+A DXF file with a different unit setting can arrive ten times too large or ten times too small. A coordinate pair in a CSV needs a declared order, because latitude first and longitude first look alike. An export that keeps object data is not the same as an export that keeps plain attributes, so say which one the receiver needs. A DXF file stores drawing geometry and layers, and it is the safest exchange format for AutoCAD. Every format loses something, so decide what matters before you convert.
+
+Check the extent after a reprojection, because a wrong zone moves the whole dataset. A GeoPackage stores many layers, long field names and spatial indexes in one file. A date field is text in a shapefile and a real date in a GeoPackage, so check it after a conversion.
+
+QGIS
+
+The processing toolbox runs buffer, clip, dissolve, intersection and spatial join. The OGR provider reads a shapefile, and the same provider writes a GeoPackage layer. Save the style with the layer, because a colour ramp lost on reload is work you repeat.
+
+PyQGIS exposes layers, features, geometry and the processing registry to Python. The OGR provider reads a shapefile, and the same provider writes a GeoPackage layer. The command qgis_process runs those algorithms without a window, which makes it usable from a script. The processing toolbox runs buffer, clip, dissolve, intersection and spatial join.
+
+Layers and scripts
+
+Lock a layer when you want to see it but not edit it, because a locked object cannot be selected for editing. The command LAYERP opens the layer properties manager, and -LAYER works without a dialog. The command -PURGE with the option All removes the unused layers that a script leaves behind. A layer with no objects is not free to keep if it also carries a plot style that nobody understands.
+
+Lock a layer when you want to see it but not edit it, because a locked object cannot be selected for editing. Colour, linetype and lineweight belong to the layer, not to the object, when objects use BYLAYER. The TEXT layer and the WATER layer stay separate, because one is existing and one is proposed.
+
+A layer filter groups layers by name, and a saved filter makes a large layer list usable. The layer TEXT is drawn in red so that the plot reads cleanly. The command -PURGE with the option All removes the unused layers that a script leaves behind.
+
+Coordinates and projections
+
+A coordinate without a system is a number without a meaning. A projection always distorts something, so choose one that keeps the measurement you care about. Store coordinates in the system you will analyse in, and reproject at the edge of the work. A geographic coordinate system uses latitude and longitude, and a projected coordinate system uses metres on a flat surface. A datum shift can move features by metres, so never assume that two systems agree.
+
+The command ogr2ogr can reproject while it converts, with the option -t_srs. Store coordinates in the system you will analyse in, and reproject at the edge of the work. Web Mercator is convenient for tiled maps and wrong for area measurements.
+
+Revit and building data
+
+A level is a horizontal reference plane, and every wall is hosted by one. Shared parameters travel between projects, and project parameters stay in one model. The Revit API is reached with Python through pyRevit, and every change must be inside a transaction. An element id is stable inside one model, and it is not a reliable key between models. The document class gives access to the model, and the active view is not always the view you want.
+
+A schedule reads parameters from elements and lists them in a table. A type holds the dimensions, and an instance holds the position. Revit stores a building model in an RVT file and organises it by categories, families and types. A transaction groups changes so that they are saved or undone together. Read the model before you write to it, because a script that guesses will overwrite work.
+
+A transaction groups changes so that they are saved or undone together. Shared parameters travel between projects, and project parameters stay in one model. A level is a horizontal reference plane, and every wall is hosted by one. A warning in Revit is not an error, but a batch of warnings usually hides one.
+
+AutoCAD Map 3D
+
+The command MAPCSASSIGN assigns a coordinate system to the drawing and warns when one is already assigned. The command MAPCLEAN closes small gaps, removes duplicates and fixes overshoots. Object data lives inside the drawing, and a feature data object connection lives outside it.
+
+The command MAPIMPORT brings a shapefile into the drawing, and the command MAPEXPORT writes drawing objects back out. EPSG 28992 is Amersfoort / RD New, measured in metres, and it is used in the Netherlands. A drawing that arrives without a coordinate system is a sketch, not a map.
+
+The command MAPIMPORT brings a shapefile into the drawing, and the command MAPEXPORT writes drawing objects back out. Do not mix drawing units, because a line drawn in millimetres will not line up with a parcel measured in metres. Object data lives inside the drawing, and a feature data object connection lives outside it. EPSG 25833 is ETRS89 / UTM zone 33N, measured in metres, and it is used in eastern Europe.
+
+PyQGIS and qgis_process
+
+A feature is read with getFeatures, and each feature carries a geometry and a set of attributes. The method addMapLayer adds a layer to the project, and the method removeMapLayer takes it away. The class QgsCoordinateTransform changes coordinates between two reference systems. The method commitChanges saves edits to the data source, and the method rollBack undoes them.
+
+A field that does not exist is created with a field definition and an edit buffer, and the change is committed after the loop. The class QgsProject holds the open project, and the method mapLayers returns its layers. A memory layer keeps features in memory, which is useful for a result that does not need saving. The processing module runs an algorithm with run, and the parameters are passed as a dictionary.
+
+Automation safety
+
+A confirmation prompt is not a security boundary when the same flag can be passed by a script. Log every change with the file, the recipe and the time, so a bad run can be traced. A dry run prints the steps without touching data, and it costs seconds. Keep the source data read only, and write results into a new folder. Pin the tool version, because an algorithm that changes behaviour changes your result.
+
+A path from a request is data, not code, and it should be quoted as data. Keep the working folder small, because a folder with ten thousand files slows every tool. A confirmation prompt is not a security boundary when the same flag can be passed by a script. Generate the script, read it, then run it, because a script repeats every mistake you make very fast.
+
+Example sessions
+User: export attributes of blocks to csv
+amu: Recipe autocad.attributes_to_csv matched. Wrote att2csv.lsp, which writes one row per block reference.
+User: create levels at 0, 3.5, 7, 10.5
+amu: Recipe revit.create_levels matched. Wrote create_levels.py, which opens one transaction and creates four levels.
+User: reproject parcels.shp to EPSG:25832
+amu: Recipe qgis.reproject matched. Wrote reproject.py and the qgis_process command with -t_srs EPSG:25832.
+User: audit and purge this drawing
+amu: Recipe autocad.audit_purge matched. Wrote audit_purge.scr, and the note says to run it on a copy first.
+User: import shapefile into autocad map 3d
+amu: Recipe map3d.import_shapefile matched. Wrote the ogr2ogr conversion and the MAPCSASSIGN and MAPIMPORT steps.
+
+Code: create levels in pyRevit
+
+from Autodesk.Revit.DB import Level, Transaction
+
+doc = __revit__.ActiveUIDocument.Document
+elevations = [0.0, 3.5, 7.0, 10.5]
+
+transaction = Transaction(doc, "Create levels")
+transaction.Start()
+try:
+    for elevation in elevations:
+        Level.Create(doc, elevation)
+    transaction.Commit()
+except Exception:
+    transaction.RollBack()
+    raise
+
+Code: export block handles in AutoLISP
+
+(defun c:TMK-ATT2CSV ( / ss file index entity handle block )
+  (setq ss (ssget "_X" '((0 . "INSERT"))))
+  (setq file (open "C:/work/attributes.csv" "w"))
+  (write-line "handle,block" file)
+  (setq index 0)
+  (while (< index (sslength ss))
+    (setq entity (ssname ss index))
+    (setq handle (cdr (assoc 5 (entget entity))))
+    (setq block (cdr (assoc 2 (entget entity))))
+    (write-line (strcat handle "," block) file)
+    (setq index (1+ index))
+  )
+  (close file)
+  (princ)
+)
+
+AutoCAD Map 3D
+
+A shapefile is a set of files, and the DBF file holds the attributes that the SHP file cannot. AutoCAD Map 3D adds geographic data to AutoCAD, and the drawing stays the centre of the work. A coordinate system maps drawing coordinates to positions on the earth, and an EPSG code names that system.
+
+Object data lives inside the drawing, and a feature data object connection lives outside it. Map 3D keeps the original drawing objects, so an import can be reversed more easily than a conversion. The command MAPCLEAN closes small gaps, removes duplicates and fixes overshoots.
+
+Coordinates and projections
+
+A PRJ file stores the coordinate system of a shapefile, and a missing PRJ means an unknown system. The zone number in a UTM system changes every six degrees of longitude. A datum shift can move features by metres, so never assume that two systems agree. EPSG 27700 is OSGB36 / British National Grid, and a coordinate in it is given in metres.
+
+Reprojection changes coordinates, not the shapes on the ground. A geographic coordinate system uses latitude and longitude, and a projected coordinate system uses metres on a flat surface. Web Mercator is convenient for tiled maps and wrong for area measurements.
+
+PyQGIS and qgis_process
+
+The processing module runs an algorithm with run, and the parameters are passed as a dictionary. A vector layer is opened with QgsVectorLayer, and the second argument names the provider. A print layout is exported with the class QgsLayoutExporter, and the format is set on the export settings. The distance parameter of a buffer is in the units of the layer, not in the units of the project.
+
+A feature is read with getFeatures, and each feature carries a geometry and a set of attributes. A script that runs inside QGIS has a running application, and a script that runs outside it must create one. An algorithm name looks like native:buffer, and the prefix names the provider that supplies it.
+
+Delivery notes
+
+A layer list is part of the deliverable, because the next person needs to know what each layer means. A drawing that has been audited, purged and saved is ready to send. Keep a copy of the inputs next to the outputs when the job is small.
+
+Remove the temporary files before you zip, and check the archive by opening it. A zip file with a flat folder is easier to open than a deep tree of folders. Deliver the drawing, the source data, the script and a short note that says what changed. A layer list is part of the deliverable, because the next person needs to know what each layer means.
+
+AutoLISP
+
+A program ends with (princ), which prints nothing and returns quietly to the prompt. A selection set can be iterated with ssname and sslength, and a loop over it edits one entity at a time. The function command calls an AutoCAD command, and it expects the same answers that you would type. Strings in AutoLISP are escaped so that a quote, a backslash or a newline cannot break the program. Check the parentheses before you load a program, because one missing parenthesis stops the whole file.
+
+A command that begins with c: runs like a built-in command, and a function without c: must be called from another program. A program ends with (princ), which prints nothing and returns quietly to the prompt. Strings in AutoLISP are escaped so that a quote, a backslash or a newline cannot break the program. A selection set can be iterated with ssname and sslength, and a loop over it edits one entity at a time. The function setq assigns a value, and the function list builds a list.
+
+Revit and building data
+
+The document class gives access to the model, and the active view is not always the view you want. The Revit API is reached with Python through pyRevit, and every change must be inside a transaction. Purge unused families before delivery, because an RVT file carries everything it ever held. A workset splits a model so that several people can work in it at the same time. A family is a parametric component, and a family instance is one placement of it.
+
+A warning in Revit is not an error, but a batch of warnings usually hides one. A workset splits a model so that several people can work in it at the same time. A type holds the dimensions, and an instance holds the position. Shared parameters travel between projects, and project parameters stay in one model.
+
+QGIS
+
+QGIS is a free geographic information system that runs on Windows, macOS and Linux. A geometry check finds invalid polygons, and the fix geometry tool repairs them. A QGIS project is saved as a QGZ file, and a GeoPackage stores many layers in one SQLite file.
+
+A buffer builds a polygon at a fixed distance around each feature, and a negative distance shrinks it. The command qgis_process runs those algorithms without a window, which makes it usable from a script. A spatial join copies attributes from the layer you join onto the layer you join to. The OGR provider reads a shapefile, and the same provider writes a GeoPackage layer.
+
+Writing scripts
+
+An error handler rolls the transaction back and prints the message, so a failure leaves no partial work. A script that runs twice should produce the same result, or it should refuse the second run. Print what the program did, so the operator can see the result without opening the file.
+
+A comment above a block explains why the block exists, not what each line does. A script that runs twice should produce the same result, or it should refuse the second run. Test the program on a copy of the drawing, then read its output before running it on the real model. Keep every function short, because a long function is hard to review before it runs.
+
+The header of a script names the drawing, the date and the recipe that produced it. One recipe writes one artifact, so a failed run leaves one file to delete. Keep the command line and the script in the same folder, so the two do not drift apart. An error handler rolls the transaction back and prints the message, so a failure leaves no partial work.
+
+Glossary
+
+A multipolygon holds several polygons that belong to one feature. A polygon is a closed area bounded by one outer ring and any number of inner rings. A raster cell is one square of a grid, and its value is the measurement stored there. A viewport is a window on a layout that shows model space.
+
+A spatial index is a lookup structure that makes a location query fast. An overlay combines two layers and keeps the parts that intersect. A segment is the straight piece between two vertices.
+
+Layers and scripts
+
+The layer DIMENSIONS is drawn in yellow so that the plot reads cleanly. Name layers in a fixed pattern so that a filter, a query or an export can find them later. The command LAYERP opens the layer properties manager, and -LAYER works without a dialog.
+
+Freeze a layer when its objects should not be computed, and turn it off when they should only be hidden. Colour, linetype and lineweight belong to the layer, not to the object, when objects use BYLAYER. A script that creates layers twice fails on the second run unless it checks whether the layer exists.
+
+Name layers in a fixed pattern so that a filter, a query or an export can find them later. Colour, linetype and lineweight belong to the layer, not to the object, when objects use BYLAYER. A script sets the current layer, draws, and restores the previous layer before it ends.
+
+OCR and scanned drawings
+
+A confidence of ninety or more is usually correct, and a confidence of thirty is usually wrong. If OCR finds nothing, check that the image is not blank and that the text is not lighter than the background. A confidence below sixty usually means the scan is rotated, noisy or too small. The OCR pass reads the title block and returns the project name and the sheet number. The OCR text is a hint for the operator, not a source of coordinates.
+
+The OCR pass reads the title block and returns the project name and the sheet number. The OCR output is saved as text next to the image, so the next step does not repeat the work. Tesseract reads a clean scan well and a photograph badly, so deskew and threshold first. Handwriting is not what tesseract is built for, and the confidence shows it. If OCR finds nothing, check that the image is not blank and that the text is not lighter than the background.
+
+OCR returns text, not geometry: a detected label still needs a check against the drawing. A page segmentation mode of six treats the page as one uniform block of text. Handwriting is not what tesseract is built for, and the confidence shows it.
+
+Data exchange
+
+A CSV file stores attributes without geometry, so a coordinate pair must be carried in two fields. A field name longer than ten characters is truncated by a shapefile, and the truncation can collide. Check the extent after a reprojection, because a wrong zone moves the whole dataset.
+
+Every format loses something, so decide what matters before you convert. A DXF file with a different unit setting can arrive ten times too large or ten times too small. A field name longer than ten characters is truncated by a shapefile, and the truncation can collide. A coordinate pair in a CSV needs a declared order, because latitude first and longitude first look alike. A SHP file stores geometry and attributes, and it loses styling, labels and relationships.
+
+A coordinate pair in a CSV needs a declared order, because latitude first and longitude first look alike. A DXF file with a different unit setting can arrive ten times too large or ten times too small. A GeoPackage stores many layers, long field names and spatial indexes in one file.
+
+Automation safety
+
+An allowlist of binaries is safer than a blocklist, because a blocklist always misses one. A script that deletes or overwrites needs a confirmation flag before it runs. Generate the script, read it, then run it, because a script repeats every mistake you make very fast. Keep the source data read only, and write results into a new folder. A confirmation prompt is not a security boundary when the same flag can be passed by a script.
+
+An allowlist of binaries is safer than a blocklist, because a blocklist always misses one. Run the audit before and after, and compare the counts. Back up the drawing before a batch, and keep the backup until the batch is checked. Keep the source data read only, and write results into a new folder. Test a script on a copy of the drawing, never on the only copy.
+
+Troubleshooting
+
+If a shapefile will not open, check that the SHX and DBF files sit next to the SHP file. If a command is unknown, check the application version, because commands move between releases. If features land in the wrong place, check the coordinate system before you move anything. If a polygon has a hole, check the ring order and the closing point. If a buffer looks wrong, check the units of the distance.
+
+If a command is unknown, check the application version, because commands move between releases. If a polygon has a hole, check the ring order and the closing point. If features land in the wrong place, check the coordinate system before you move anything. If a PDF is blank, check the plot window and the page setup.
+
+If an export is empty, check the selection and the layer visibility. If a dialog appears in a script, the script is waiting for an answer that will never come. If features land in the wrong place, check the coordinate system before you move anything. If a PDF is blank, check the plot window and the page setup. If a buffer looks wrong, check the units of the distance.
+
+AutoCAD drawing basics
+
+A layout holds a title block and one or more viewports, and each viewport shows model space at a chosen scale. A drawing is the container for everything you draw in AutoCAD, and it is saved as a DWG file. Layer 0 is special: objects on layer 0 take the properties of the block that contains them. A viewport can freeze a layer for one layout without freezing it in the model.
+
+An xref links another drawing into the current drawing instead of copying its objects. A drawing is the container for everything you draw in AutoCAD, and it is saved as a DWG file. An object has a colour, a layer, a linetype and a lineweight, and each of them can be set directly or by layer. Layer 0 is special: objects on layer 0 take the properties of the block that contains them.
+
+Example sessions
+User: describe site_plan.png
+amu: The image is 2400 by 1700 pixels, with 4.2 percent ink coverage and content that reaches the right edge.
+User: buffer roads by 25 metres and clip to parcels
+amu: Recipe qgis.buffer_clip matched. Wrote the PyQGIS script with a 25 metre buffer and a clip to the parcel layer.
+User: create levels at 0, 3.5, 7, 10.5
+amu: Recipe revit.create_levels matched. Wrote create_levels.py, which opens one transaction and creates four levels.
+User: reproject parcels.shp to EPSG:25832
+amu: Recipe qgis.reproject matched. Wrote reproject.py and the qgis_process command with -t_srs EPSG:25832.
+User: import shapefile into autocad map 3d
+amu: Recipe map3d.import_shapefile matched. Wrote the ogr2ogr conversion and the MAPCSASSIGN and MAPIMPORT steps.
+
+Code: reproject with qgis_process
+
+qgis_process run native:reprojectlayer --INPUT=parcels.shp --TARGET_CRS=EPSG:25832 --OUTPUT=parcels_25832.gpkg
+
+Code: create layers in AutoLISP
+
+(defun c:TMK-LAYERS ( / layers )
+  (setq layers '(
+    ("ROADS" 1)
+    ("PARCELS" 2)
+    ("CONTOURS" 3)
+  ))
+  (foreach item layers
+    (if (not (tblsearch "LAYER" (car item)))
+      (command "-LAYER" "New" (car item) "Color" (cadr item) (car item) "")
+    )
+  )
+  (princ)
+)
+
+Delivery notes
+
+A layer list is part of the deliverable, because the next person needs to know what each layer means. A drawing that has been audited, purged and saved is ready to send. A delivery note is short: what it is, what changed, what is missing. Deliver the drawing, the source data, the script and a short note that says what changed.
+
+Name the output with the date and the recipe, so a later run does not overwrite an earlier one. Record the tool version in the note, because a result without a version cannot be repeated. A zip file with a flat folder is easier to open than a deep tree of folders.
+
+Coordinates and projections
+
+A transformation between two datums can need a grid file, and without it the result is only approximate. Store coordinates in the system you will analyse in, and reproject at the edge of the work. A projection always distorts something, so choose one that keeps the measurement you care about.
+
+Web Mercator is convenient for tiled maps and wrong for area measurements. A geographic coordinate system uses latitude and longitude, and a projected coordinate system uses metres on a flat surface. A coordinate without a system is a number without a meaning.
+
+AutoCAD Map 3D
+
+Do not mix drawing units, because a line drawn in millimetres will not line up with a parcel measured in metres. EPSG 27700 is OSGB36 / British National Grid, measured in metres, and it is used in Great Britain. Check the coordinate system before an export, because the export writes the coordinates it is given. A coordinate system maps drawing coordinates to positions on the earth, and an EPSG code names that system. The command MAPCSASSIGN assigns a coordinate system to the drawing and warns when one is already assigned.
+
+A topology records how lines connect and where polygons share a boundary. The command MAPIMPORT brings a shapefile into the drawing, and the command MAPEXPORT writes drawing objects back out. EPSG 25833 is ETRS89 / UTM zone 33N, measured in metres, and it is used in eastern Europe. A shapefile is a set of files, and the DBF file holds the attributes that the SHP file cannot.
+
+Data exchange
+
+A SHP file stores geometry and attributes, and it loses styling, labels and relationships. An export that keeps object data is not the same as an export that keeps plain attributes, so say which one the receiver needs. A DXF file with a different unit setting can arrive ten times too large or ten times too small. A field name longer than ten characters is truncated by a shapefile, and the truncation can collide. A coordinate pair in a CSV needs a declared order, because latitude first and longitude first look alike.
+
+Check the extent after a reprojection, because a wrong zone moves the whole dataset. Run a count before and after a conversion, and compare the totals. A coordinate pair in a CSV needs a declared order, because latitude first and longitude first look alike. A DXF file stores drawing geometry and layers, and it is the safest exchange format for AutoCAD.
+
+A checksum of the source makes a repeatable conversion verifiable. Check the extent after a reprojection, because a wrong zone moves the whole dataset. Keep the source file read only, and write every result into a new folder. Run a count before and after a conversion, and compare the totals.
+
+Troubleshooting
+
+If a command is unknown, check the application version, because commands move between releases. If a join returns nothing, check the field type, because text and numbers do not match. If a script stops halfway, run it line by line and find the first prompt that differs. If an export is empty, check the selection and the layer visibility.
+
+If a command is unknown, check the application version, because commands move between releases. If a join returns nothing, check the field type, because text and numbers do not match. If a script stops halfway, run it line by line and find the first prompt that differs. If the result differs between runs, check the random seed and the tool version. If a file is locked, check for a second application that still has it open.
+
+OCR and scanned drawings

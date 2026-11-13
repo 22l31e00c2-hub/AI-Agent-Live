@@ -1,0 +1,14 @@
+{
+  "name": "amu-web",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "amu in the browser: ONNX Runtime Web inference for the amu character model",
+  "scripts": {
+    "test": "node test_node.mjs",
+    "serve": "python3 serve.py"
+  },
+  "devDependencies": {
+    "onnxruntime-node": "^1.22.0"
+  }
+}

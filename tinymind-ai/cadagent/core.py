@@ -434,6 +434,7 @@ class Agent:
             "files": [self.rel_path(path) for path in report.files],
             "executed": bool(report.outcome and report.outcome.ran),
             "error": report.error,
+            "text": report.text,
         }
         with self.log_path.open("a", encoding="utf-8") as handle:
             handle.write(json.dumps(entry) + "\n")
